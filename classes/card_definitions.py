@@ -1,7 +1,3 @@
-"""
-@author: Aleph Aseffa
-"""
-
 
 class Card:
     def __init__(self, card_name, color_group, card_cost, house_cost, houses_built, rent_prices, mortgage_amt, owner, mortgaged):
@@ -19,46 +15,71 @@ class Card:
         """
         Sets the card's mortgaged status to True and updates the player's balance.
         :param player: An instance of the Player class.
-        :return: None.
         """
         player.add_balance(self.mortgage_amt)
         self.mortgaged = True
+
+    def buy_mortgage(self,player):
+        """
+        Set Mortgage to false and pay the mortgage price plus 10%
+        :param player: An instance of the Player class.
+        :returns: Assert Error if not completed correctly.
+        """
+        mortgage_cost=self.mortgage_amt * 1.10
+        assert player.balance >= mortgage_cost
+        player.reduce_balance(mortgage_cost)
+        self.mortgaged=False
 
     def sell(self, player):
         """
         Returns ownership of the card to the Bank and updates the player's balance.
         :param player: An instance of the Player class.
-        :return: None.
+        :returns: Assert Error if not completed correctly.
         """
         player.add_balance(self.card_cost)
         self.owner = 'Bank'
+
+    def sell_player(self, player, player2, cost):
+        """
+        Returns ownership of the card to the Bank and updates the player's balance.
+        :param player: An instance of the Player class.
+        :return: 1.
+        """
+        player.add_balance(cost)
+        player2.reduce_balance(cost)
+        self.owner = player2.name
+
+    def sell_house(self, player):
+        """
+        Returns ownership of the card to the Bank and updates the player's balance.
+        :param player: An instance of the Player class.
+        :returns: Assert Error if not completed correctly.
+        """
+        assert self.houses_built > 0
+        house_sell_value=self.house_cost/2
+        player.add_balance(house_sell_value)
+        self.houses_built -= 1
 
     def purchase_card(self, player):
         """
         Gives ownership of the card to the Bank and updates the player's balance.
         :param player: An instance of the Player class.
-        :return: None.
+        :returns: Assert Error if not completed correctly.
         """
-        if self.card_cost > player.balance:
-            print("You cannot afford this card at the moment.")
-        else:
-            player.cards_owned.append(self)
-            player.reduce_balance(self.card_cost)
-            self.owner = player
+        assert self.card_cost <= player.balance
+        player.cards_owned.append(self)
+        player.reduce_balance(self.card_cost)
+        self.owner = player
 
     def construct_house(self, player):
         """
         Updates number of houses that have been built on the card.
         :param player: An instance of the Player class.
-        :return: None.
         """
-        if self.house_cost > player.balance:
-            print("You cannot afford a house on this property at the moment.")
-        elif self.houses_built == 5:
-            print("You have built the maximum number of houses on this property.")
-        else:
-            self.houses_built += 1
-            print(f"You have built a house on {self.card_name}.")
+        assert self.house_cost <= player.balance or self.houses_built < 5
+        player.balance= player.balance - self.house_cost
+        self.houses_built += 1
+
 
 
 def locate_card_object(name, board):

@@ -1,12 +1,8 @@
 """
-@author: Aleph Aseffa
-Date created: 7/14/2019
-
 Contains the Player class and associated functions.
 """
 import random
 from classes import card_definitions as c_def
-from ai import ai
 
 
 class Player:
@@ -237,53 +233,3 @@ class Player:
                 self.doubles_counter = 0
                 dice_result = self.roll_dice()
                 self.move_player(dice_result)
-
-    def trade_with_human(self, player_reference, player_list, board):
-
-        for player in player_list:
-            if player.name == player_reference:
-                other_player = player
-
-        cash_given = int(input("How much cash are you giving away? "))
-        properties_to_offer = input("Enter the properties do you want to offer separated by commas\n").split(',')
-
-        cash_received = int(input(f"How much cash is {other_player.name} giving you?"))
-        properties_received = input(f"Which properties is {other_player.name} giving you?\n").split(',')
-
-        if properties_to_offer[0] == '':
-            pass
-        else:
-            for card in properties_to_offer:
-                card_object = c_def.locate_card_object(card, board)
-                other_player.cards_owned.append(card_object)
-
-        self.reduce_balance(cash_given)
-        other_player.add_balance(cash_given)
-
-        if properties_received[0] == '':
-            pass
-        else:
-            for card in properties_received:
-                card_object = c_def.locate_card_object(card, board)
-                self.cards_owned.append(card_object)
-
-        other_player.reduce_balance(cash_received)
-        self.add_balance(cash_received)
-
-        print(f"{self.name} has given ${cash_given} and the following properties: {properties_to_offer}")
-        print(f"{other_player.name} has received ${cash_received} and the following properties: {properties_received}")
-
-    def trade_with_ai(self, computer, board):
-        cash_offered = int(input("How much cash do you want to offer? "))
-        properties_to_offer = input("Enter the properties do you want to offer separated by commas\n").split(',')
-
-        cash_wanted = int(input("How much cash do you want the AI to give you? "))
-        properties_to_receive = input("Enter the properties you want the AI to give you (separated by commas)\n").split(',')
-
-        if ai.evaluate_trade(self, computer, cash_offered, properties_to_offer, cash_wanted, properties_to_receive, board):
-            print(f"The AI has accepted your trade offer and the trade has been completed.")
-
-        else:
-            retry = input("The AI has rejected your trade offer. Do you want to suggest a different trade? (y/n")
-            if retry == "y":
-                self.trade_with_ai(computer, board)

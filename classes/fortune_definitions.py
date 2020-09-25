@@ -9,5 +9,5 @@ class Fortune:
         self.destination=destination                # int
         self.money=money                            # int
 
-    def operate(self,player):
+    def play(self,player):
         return 0

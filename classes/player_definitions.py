@@ -6,16 +6,16 @@ from classes import card_definitions as c_def
 
 
 class Player:
-    def __init__(self, name, balance, cards_owned, current_pos, in_jail, railroads_owned, doubles_counter, amount_owed, bankruptcy_status):
-        self.name = name                            # str
-        self.balance = balance                      # int
-        self.cards_owned = cards_owned              # list
-        self.current_pos = current_pos              # int (index)
-        self.in_jail = in_jail                      # bool
-        self.railroads_owned = railroads_owned      # int
-        self.doubles_counter = doubles_counter      # int
-        self.amount_owed = amount_owed              # int
-        self.bankruptcy_status = bankruptcy_status  # bool
+    def __init__(self, name):
+        self.name = name                # str
+        self.balance = 1500             # int
+        self.cards_owned = []           # list
+        self.current_pos = 0            # int (index)
+        self.in_jail = False            # bool
+        self.railroads_owned = 0        # int
+        self.doubles_counter = 0        # int
+        self.amount_owed = 0            # int
+        self.bankruptcy_status = False  # bool
 
     def roll_dice(self):  # TODO: add check for doubles.
         """
@@ -75,7 +75,8 @@ class Player:
                 if brd_property.owner.name == self.name:
                     print(f"{self.name} landed on {brd_property.card_name}, a property they own.")
                 else:
-                    print(f"{self.name} landed on {brd_property.card_name}, a property owned by {brd_property.owner.name}")
+                    print(
+                        f"{self.name} landed on {brd_property.card_name}, a property owned by {brd_property.owner.name}")
                     self.charge_rent(brd_property)
 
             else:

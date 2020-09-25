@@ -26,7 +26,7 @@ class Player:
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
         if dice1 == dice2:
-            self.doubles_counter=1
+            self.doubles_counter+=1
         n = dice1 + dice2
         return n
 

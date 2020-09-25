@@ -17,7 +17,7 @@ class Player:
         self.amount_owed = 0            # int
         self.bankruptcy_status = False  # bool
 
-    def roll_dice(self):  # TODO: add check for doubles.
+    def roll_dice(self):
         """
         Simulates the randomness of throwing two die.
         :return: n: an int between 2 and 12 inclusive.
@@ -25,8 +25,9 @@ class Player:
         random.seed()
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
+        if dice1 == dice2:
+            self.doubles_counter=1
         n = dice1 + dice2
-        print(f"{self.name} threw {n}")
         return n
 
     def move_player(self, dice_amt):
@@ -38,7 +39,7 @@ class Player:
         self.current_pos += dice_amt
         return self.current_pos
 
-    def check_pos(self, board):
+    def check_pos(self, board): # TODO
         """
         Checks what card the player has landed on and carries out the appropriate action.
         :param board: list, the monopoly board.
@@ -105,13 +106,13 @@ class Player:
         """
         if card.color_group == "Railroad":
             rent_amt = 25 * card.owner.railroads_owned
-        else:
-            rent_amt = card.rent_prices[1]
-        print(f"{self.name} is paying ${rent_amt} as a rental charge to {card.owner.name}")
+        elif card.mortgaged == False:
+            total_casas=card.houses_built
+            rent_amt = card.rent_prices[total_casas]
         self.reduce_balance(rent_amt)
         card.owner.add_balance(rent_amt)
 
-    def reduce_balance(self, amount):
+    def reduce_balance(self, amount): #TODO
         """
         Reduces the player's balance.
         :param amount: int, the amount of money to reduce the player's balance by.
@@ -130,7 +131,7 @@ class Player:
         else:
             self.balance -= amount
 
-    def bankrupt_player(self):
+    def bankrupt_player_to_bank(self):
         """
         Bank collects all the player's owned properties and sets their bankruptcy status to True.
         :return: None.
@@ -144,7 +145,21 @@ class Player:
 
         self.bankruptcy_status = True
 
-    def check_if_bankrupt(self, amt_owed):
+    def bankrupt_player_to_player(self,player):
+        """
+        The designed player collects all the player's owned properties and sets their bankruptcy status to True.
+        :return: None.
+        """
+        self.balance = 0
+
+        if len(self.cards_owned):
+            for card in self.cards_owned:
+                card.owner = player.name
+        self.railroads_owned = 0
+
+        self.bankruptcy_status = True
+
+    def check_if_bankrupt(self, amt_owed): #TODO
         """
         Checks if the player is bankrupt (i.e. can the player afford what they are being charged?).
         :param amt_owed: int, the amount the player is being charged.
@@ -215,22 +230,28 @@ class Player:
         """
         self.current_pos = 10
         self.doubles_counter = 0
+        self.in_jail = True
 
-    def release_from_jail(self):
+    def release_from_jail_by_rolling(self):
         """
         Releases the player from jail.
         :return: None.
         """
         self.doubles_counter = 0
-        bail_choice = input("Would you like to pay the $50 bail? (y/n) ")
-        if bail_choice == "y":
-            self.reduce_balance(50)
+        self.roll_dice()
+        if self.doubles_counter == 1:
+            self.doubles_counter = 0
             self.in_jail = False
             dice_result = self.roll_dice()
             self.move_player(dice_result)
-        else:
-            self.roll_dice()
-            if self.doubles_counter == 1:
-                self.doubles_counter = 0
-                dice_result = self.roll_dice()
-                self.move_player(dice_result)
+
+    def release_from_jail_paying(self):
+        """
+        Releases the player from jail.
+        :return: None.
+        """
+        self.doubles_counter = 0
+        self.reduce_balance(50)
+        self.in_jail = False
+        dice_result = self.roll_dice()
+        self.move_player(dice_result)

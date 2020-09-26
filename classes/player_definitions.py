@@ -37,9 +37,19 @@ class Player:
         :return: an int that represents the updated position of the player on the board.
         """
         self.current_pos += dice_amt
+        self.current_pos= self.current_pos % 40
         return self.current_pos
 
-    def check_pos(self, board): # TODO
+    def move_player_card(self, destination):
+        """
+        Moves the player by the amount returned by rolling two die.
+        :param dice_amt: int, the number rolled by the two die.
+        :return: an int that represents the updated position of the player on the board.
+        """
+        self.current_pos = destination
+        return self.current_pos
+
+    def check_pos(self, board):
         """
         Checks what card the player has landed on and carries out the appropriate action.
         :param board: list, the monopoly board.
@@ -47,47 +57,12 @@ class Player:
         """
         self.current_pos = self.current_pos % 40
         brd_property = board[self.current_pos]
-
-        if brd_property.card_cost == "N/A":  # this means the player cannot purchase the card
-
-            if brd_property.card_name == 'Jail/Visiting Jail':
-                print(f"{self.name} is visiting jail.")
-
-            elif brd_property.card_name == 'Luxury Tax':
-                print(f"{self.name} landed on Luxury Tax and has been fined $75")
-                self.reduce_balance(75)
-
-            elif brd_property.card_name == 'Income Tax':
-                print(f"{self.name} landed on Income Tax and has been fined $200")
-                self.reduce_balance(200)
-
-            elif brd_property.card_name == 'Go to Jail':
-                print(f"{self.name} landed on Go to Jail and has been arrested!")
-                self.send_to_jail()
-
-            else:
-                print(f"{self.name} landed on {brd_property.card_name}")
-
-        else:
-            if brd_property.mortgaged:
-                print(f"{self.name} landed on a mortgaged property.")
-
-            elif brd_property.owner != 'Bank':  # and brd_property.owner.name != self.name:
-                if brd_property.owner.name == self.name:
-                    print(f"{self.name} landed on {brd_property.card_name}, a property they own.")
-                else:
-                    print(
-                        f"{self.name} landed on {brd_property.card_name}, a property owned by {brd_property.owner.name}")
-                    self.charge_rent(brd_property)
-
-            else:
-                print(f"{self.name} landed on {brd_property.card_name}")
-                if self.name == "AI":
-                    return 1  # Indicates to the AI that the property can be purchased
-                else:
-                    user_action = input("Do you want to buy the property? (y/n) ")
-                    if user_action == 'y':
-                        brd_property.purchase_card(self)
+        if brd_property.owner == 'Bank':
+            #TODO buy or not buy
+            return 0
+        else:  # and brd_property.owner.name != self.name:
+            if brd_property.owner.name != self.name:
+                self.charge_rent(brd_property)
 
     def add_balance(self, amount):
         """
@@ -119,6 +94,7 @@ class Player:
         :return: None.
         """
         if self.balance < amount:
+            """
             print("Your balance is insufficient for this action.")
             bankrupt = self.check_if_bankrupt(amount)
             if not bankrupt:
@@ -128,6 +104,8 @@ class Player:
                     pass  # sell()  TODO: implement this function.
                 else:
                     pass  # mortgage()  TODO: implement this function.
+            """
+
         else:
             self.balance -= amount
 

@@ -10,4 +10,14 @@ class Fortune:
         self.money=money                            # int
 
     def play(self,player):
-        return 0
+        if self.movement:
+            if player.current_pos >= self.destination:
+                player.add_balance(200)
+            player.move_player_card(self.destination)
+        if self.receive:
+            player.add_balance(self.money)
+        if self.pay:
+            player.reduce_balance(self.money)
+        if self.card_name == 'Go to Jail':
+            player.send_to_jail()
+

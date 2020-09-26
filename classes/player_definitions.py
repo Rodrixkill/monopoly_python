@@ -55,10 +55,10 @@ class Player:
         :param card:
         :return:
         """
-        if card.owner == 'Bank':
-            if card.card_cost <= self.balance:
-                card.owner = self.name
-                self.reduce_balance(card.card_cost)
+        assert card.owner == 'Bank'
+        if card.card_cost <= self.balance:
+            card.owner = self.name
+            self.reduce_balance(card.card_cost)
 
 
     def check_pos(self, board):

@@ -15,7 +15,7 @@ class Player:
         self.railroads_owned = 0        # int
         self.doubles_counter = 0        # int
         self.amount_owed = 0            # int
-        self.bankruptcy_status = False  # bool
+        self.bankruptcy = False  # bool
 
     def roll_dice(self):
         """
@@ -26,7 +26,7 @@ class Player:
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
         if dice1 == dice2:
-            self.doubles_counter+=1
+            self.doubles_counter += 1
         n = dice1 + dice2
         return n
 
@@ -143,7 +143,7 @@ class Player:
                 card.owner = "Bank"
         self.railroads_owned = 0
 
-        self.bankruptcy_status = True
+        self.bankruptcy = True
 
     def bankrupt_player_to_player(self,player):
         """
@@ -157,7 +157,7 @@ class Player:
                 card.owner = player.name
         self.railroads_owned = 0
 
-        self.bankruptcy_status = True
+        self.bankruptcy = True
 
     def check_if_bankrupt(self, amt_owed): #TODO
         """
@@ -255,3 +255,6 @@ class Player:
         self.in_jail = False
         dice_result = self.roll_dice()
         self.move_player(dice_result)
+
+    def take_action(self, game):
+        pass

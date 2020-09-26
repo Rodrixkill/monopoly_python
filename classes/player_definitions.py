@@ -13,6 +13,7 @@ class Player:
         self.current_pos = 0            # int (index)
         self.in_jail = False            # bool
         self.railroads_owned = 0        # int
+        self.utilities_owned = 0        # int
         self.doubles_counter = 0        # int
         self.amount_owed = 0            # int
         self.bankruptcy = False  # bool
@@ -91,11 +92,27 @@ class Player:
         :param card: an instance of the Card class.
         :return: None.
         """
-        if card.color_group == "Railroad":
-            rent_amt = 25 * card.owner.railroads_owned
+        if card.color_group == "Railroad": #25,50,100,200
+            if card.owner.railroads_owned == 1:
+                rent_amt=25
+            elif card.owner.railroads_owned == 2:
+                rent_amt=50
+            elif card.owner.railroads_owned == 3:
+                rent_amt=100
+            elif card.owner.railroads_owned == 4:
+                rent_amt = 200
+        elif card.color_group == "Utilities":
+            random.seed()
+            dice_1 = random.randint(1, 6)
+            dice_2 = random.randint(1, 6)
+            n = dice_1+dice_2
+            if card.owner.utilities_owned == 1:
+                rent_amt = 4*n
+            elif card.owner.utilities_owned == 2:
+                rent_amt = 10*n
         elif card.mortgaged == False:
-            total_casas=card.houses_built
-            rent_amt = card.rent_prices[total_casas]
+            total_houses=card.houses_built
+            rent_amt = card.rent_prices[total_houses]
         self.reduce_balance(rent_amt)
         card.owner.add_balance(rent_amt)
 

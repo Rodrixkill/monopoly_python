@@ -20,4 +20,5 @@ class Fortune:
             player.reduce_balance(self.money)
         if self.card_name == 'Go to Jail':
             player.send_to_jail()
-
+        if self.card_name == 'Pay to all':
+            player.send_to_jail()

@@ -49,6 +49,18 @@ class Player:
         self.current_pos = destination
         return self.current_pos
 
+    def buy_property(self,card):
+        """
+        Buy card to make it your property
+        :param card:
+        :return:
+        """
+        if card.owner == 'Bank':
+            if card.card_cost <= self.balance:
+                card.owner = self.name
+                self.reduce_balance(card.card_cost)
+
+
     def check_pos(self, board):
         """
         Checks what card the player has landed on and carries out the appropriate action.

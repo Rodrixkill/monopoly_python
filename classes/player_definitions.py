@@ -17,6 +17,14 @@ class Player:
         self.doubles_counter = 0        # int
         self.amount_owed = 0            # int
         self.bankruptcy = False  # bool
+        self.brown = 0              # int
+        self.lightblue = 0  # int
+        self.pink = 0  # int
+        self.orange = 0  # int
+        self.red = 0  # int
+        self.yellow = 0  # int
+        self.green = 0  # int
+        self.blue = 0  # int
 
     def roll_dice(self):
         """
@@ -26,7 +34,10 @@ class Player:
         random.seed()
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
-        return dice1, dice2
+        if dice1 == dice2:
+            self.doubles_counter += 1
+        n = dice1 + dice2
+        return n
 
     def move_player(self, dice_amt):
         """
@@ -47,7 +58,7 @@ class Player:
         self.current_pos = destination
         return self.current_pos
 
-    def buy_property(self, card):
+    def buy_property(self,card):
         """
         Buy card to make it your property
         :param card:
@@ -61,6 +72,53 @@ class Player:
                 self.railroads_owned += 1
             elif card.color_group == "Utilities":
                 self.utilities_owned += 1
+            elif card.color_group == "Brown":
+                self.brown += 1
+            elif card.color_group == "Light Blue":
+                self.lightblue += 1
+            elif card.color_group == "Pink":
+                self.pink += 1
+            elif card.color_group == "Orange":
+                self.orange += 1
+            elif card.color_group == "Red":
+                self.red += 1
+            elif card.color_group == "Yellow":
+                self.yellow += 1
+            elif card.color_group == "Green":
+                self.green += 1
+            elif card.color_group == "Blue":
+                self.blue += 1
+
+    def buy_property_to_price(self,card,money):
+        """
+        Buy card to make it your property
+        :param card:
+        :return:
+        """
+        assert card.owner == 'Bank'
+        if card.card_cost <= self.balance:
+            card.owner = self.name
+            self.reduce_balance(money)
+            if card.color_group == "Railroad":
+                self.railroads_owned += 1
+            elif card.color_group == "Utilities":
+                self.utilities_owned += 1
+            elif card.color_group == "Brown":
+                self.brown += 1
+            elif card.color_group == "Light Blue":
+                self.lightblue += 1
+            elif card.color_group == "Pink":
+                self.pink += 1
+            elif card.color_group == "Orange":
+                self.orange += 1
+            elif card.color_group == "Red":
+                self.red += 1
+            elif card.color_group == "Yellow":
+                self.yellow += 1
+            elif card.color_group == "Green":
+                self.green += 1
+            elif card.color_group == "Blue":
+                self.blue += 1
 
     def check_pos(self, board):
         """
@@ -113,6 +171,23 @@ class Player:
         elif card.mortgaged == False:
             total_houses=card.houses_built
             rent_amt = card.rent_prices[total_houses]
+            if total_houses == 0:
+                if card.color_group == "Brown" and card.owner.brown == 2:
+                    rent_amt *=2
+                elif card.color_group == "Light Blue" and card.owner.lightblue == 3:
+                    rent_amt *=2
+                elif card.color_group == "Pink" and card.owner.pink == 3:
+                    rent_amt *=2
+                elif card.color_group == "Orange" and card.owner.orange == 3:
+                    rent_amt *=2
+                elif card.color_group == "Red" and card.owner.red == 3:
+                    rent_amt *=2
+                elif card.color_group == "Yellow" and card.owner.yellow == 3:
+                    rent_amt *=2
+                elif card.color_group == "Green" and card.owner.green == 3:
+                    rent_amt *=2
+                elif card.color_group == "Blue" and card.owner.blue == 2:
+                    rent_amt *=2
         self.reduce_balance(rent_amt)
         card.owner.add_balance(rent_amt)
 
@@ -161,8 +236,27 @@ class Player:
         if len(self.cards_owned):
             for card in self.cards_owned:
                 card.owner = player.name
-        self.railroads_owned = 0
-
+                if card.color_group == "Railroad":
+                    player.railroads_owned += 1
+                elif card.color_group == "Utilities":
+                    player.utilities_owned += 1
+                elif card.color_group == "Brown":
+                    player.brown += 1
+                elif card.color_group == "Light Blue":
+                    player.lightblue += 1
+                elif card.color_group == "Pink":
+                    player.pink += 1
+                elif card.color_group == "Orange":
+                    player.orange += 1
+                elif card.color_group == "Red":
+                    player.red += 1
+                elif card.color_group == "Yellow":
+                    player.yellow += 1
+                elif card.color_group == "Green":
+                    player.green += 1
+                elif card.color_group == "Blue":
+                    player.blue += 1
+        #TODO All atributes to 0?
         self.bankruptcy = True
 
     def check_if_bankrupt(self, amt_owed): #TODO
@@ -197,6 +291,7 @@ class Player:
             total += card.card_cost
         print(f"The sum of your card costs is: ${total}")
 
+
     def send_to_jail(self):
         """
         Sends the player to jail.
@@ -229,8 +324,9 @@ class Player:
         self.in_jail = False
         dice_result = self.roll_dice()
         self.move_player(dice_result)
-    #TODO
-    #buy property specific price
+
+    def trade_between_players(self,player2,listP1,listP2,m1,m2):
+        pass
     #trade player1 player2 listaP1 listaP2 D1 D2
     def take_action(self, game):
         pass

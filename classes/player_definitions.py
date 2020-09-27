@@ -150,6 +150,7 @@ class Player:
         :param card: an instance of the Card class.
         :return: None.
         """
+        rent_amt=0
         if card.color_group == "Railroad": #25,50,100,200
             if card.owner.railroads_owned == 1:
                 rent_amt=25
@@ -290,7 +291,6 @@ class Player:
             print(f"{card.card_name}: ${card.card_cost}")
             total += card.card_cost
         print(f"The sum of your card costs is: ${total}")
-
 
     def send_to_jail(self):
         """

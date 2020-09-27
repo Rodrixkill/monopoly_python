@@ -26,10 +26,7 @@ class Player:
         random.seed()
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
-        if dice1 == dice2:
-            self.doubles_counter += 1
-        n = dice1 + dice2
-        return n
+        return dice1, dice2
 
     def move_player(self, dice_amt):
         """
@@ -50,7 +47,7 @@ class Player:
         self.current_pos = destination
         return self.current_pos
 
-    def buy_property(self,card):
+    def buy_property(self, card):
         """
         Buy card to make it your property
         :param card:
@@ -64,7 +61,6 @@ class Player:
                 self.railroads_owned += 1
             elif card.color_group == "Utilities":
                 self.utilities_owned += 1
-
 
     def check_pos(self, board):
         """
@@ -200,7 +196,6 @@ class Player:
             print(f"{card.card_name}: ${card.card_cost}")
             total += card.card_cost
         print(f"The sum of your card costs is: ${total}")
-
 
     def send_to_jail(self):
         """

@@ -9,7 +9,7 @@ class Fortune:
         self.destination=destination                # int
         self.money=money                            # int
 
-    def play(self,player):
+    def play(self,player,otherplayers):
         if self.movement:
             if player.current_pos >= self.destination:
                 player.add_balance(200)

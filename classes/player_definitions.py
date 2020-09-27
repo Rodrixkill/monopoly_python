@@ -60,6 +60,10 @@ class Player:
         if card.card_cost <= self.balance:
             card.owner = self.name
             self.reduce_balance(card.card_cost)
+            if card.color_group == "Railroad":
+                self.railroads_owned += 1
+            elif card.color_group == "Utilities":
+                self.utilities_owned += 1
 
 
     def check_pos(self, board):
@@ -134,7 +138,6 @@ class Player:
                 else:
                     pass  # mortgage()  TODO: implement this function.
             """
-
         else:
             self.balance -= amount
 
@@ -182,7 +185,6 @@ class Player:
                 net_worth += card.card_cost
 
         if (self.balance + net_worth) < amt_owed:
-            print(f"Unfortunately, {self.name} is now bankrupt! It's game over for them!")
             self.bankrupt_player()
             return True
         else:
@@ -199,36 +201,6 @@ class Player:
             total += card.card_cost
         print(f"The sum of your card costs is: ${total}")
 
-    def player_action(self, user_choice, player_list, computer, board):
-        """
-        Takes in the user's choice of what action to take and carries out that action.
-        :param user_choice: char, what the player chooses to do (e.g. r to roll the dice).
-        :return: None.
-        """
-        # TODO: add sell, mortgage, and construct house functions.
-        val = -1
-        if user_choice == "r":
-            val = self.roll_dice()
-        elif user_choice == "b":
-            print(f"Your balance is: ${self.balance}")
-        elif user_choice == "c":
-            print("Your properties are:")
-            self.display_player_properties()
-        elif user_choice == "s":
-            print("Sell property feature coming soon.")
-        elif user_choice == "m":
-            print("Mortgage property feature coming soon.")
-        elif user_choice == "h":
-            print("Construct house feature coming soon.")
-        elif user_choice == "t":
-            self.trade_with_ai(computer, board)
-        elif user_choice == "p":
-            trading_partner = input("Enter the name of the player you're trading with. ")
-            self.trade_with_human(trading_partner, player_list, board)
-        else:
-            print("Please enter a valid command.")
-
-        return val
 
     def send_to_jail(self):
         """
@@ -262,6 +234,8 @@ class Player:
         self.in_jail = False
         dice_result = self.roll_dice()
         self.move_player(dice_result)
-
+    #TODO
+    #buy property specific price
+    #trade player1 player2 listaP1 listaP2 D1 D2
     def take_action(self, game):
         pass

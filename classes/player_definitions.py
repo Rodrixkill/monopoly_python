@@ -326,7 +326,76 @@ class Player:
         self.move_player(dice_result)
 
     def trade_between_players(self,player2,listP1,listP2,m1,m2):
-        pass
-    #trade player1 player2 listaP1 listaP2 D1 D2
+        self.reduce_balance(m1)
+        player2.reduce_balance(m2)
+        self.add_balance(m2)
+        player2.add_balance(m1)
+        if len(listP1):
+            for card in listP1:
+                card.owner = player2.name
+                if card.color_group == "Railroad":
+                    player2.railroads_owned += 1
+                    self.railroads_owned -= 1
+                elif card.color_group == "Utilities":
+                    player2.utilities_owned += 1
+                    self.utilities_owned -= 1
+                elif card.color_group == "Brown":
+                    player2.brown += 1
+                    self.brown -= 1
+                elif card.color_group == "Light Blue":
+                    player2.lightblue += 1
+                    self.lightblue -= 1
+                elif card.color_group == "Pink":
+                    player2.pink += 1
+                    self.pink -= 1
+                elif card.color_group == "Orange":
+                    player2.orange += 1
+                    self.orange -= 1
+                elif card.color_group == "Red":
+                    player2.red += 1
+                    self.red -= 1
+                elif card.color_group == "Yellow":
+                    player2.yellow += 1
+                    self.yellow -= 1
+                elif card.color_group == "Green":
+                    player2.green += 1
+                    self.green -= 1
+                elif card.color_group == "Blue":
+                    player2.blue += 1
+                    self.blue -= 1
+        if len(listP2):
+            for card in listP2:
+                card.owner = self.name
+                if card.color_group == "Railroad":
+                    player2.railroads_owned -= 1
+                    self.railroads_owned += 1
+                elif card.color_group == "Utilities":
+                    player2.utilities_owned -= 1
+                    self.utilities_owned += 1
+                elif card.color_group == "Brown":
+                    player2.brown -= 1
+                    self.brown += 1
+                elif card.color_group == "Light Blue":
+                    player2.lightblue -= 1
+                    self.lightblue += 1
+                elif card.color_group == "Pink":
+                    player2.pink -= 1
+                    self.pink += 1
+                elif card.color_group == "Orange":
+                    player2.orange -= 1
+                    self.orange += 1
+                elif card.color_group == "Red":
+                    player2.red -= 1
+                    self.red += 1
+                elif card.color_group == "Yellow":
+                    player2.yellow -= 1
+                    self.yellow += 1
+                elif card.color_group == "Green":
+                    player2.green -= 1
+                    self.green += 1
+                elif card.color_group == "Blue":
+                    player2.blue -= 1
+                    self.blue += 1
+
     def take_action(self, game):
         pass

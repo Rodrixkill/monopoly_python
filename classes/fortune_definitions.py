@@ -20,11 +20,11 @@ class Fortune:
         if self.card_name == 'Go to Jail':
             player.send_to_jail()
         if self.card_name == 'Pay to all':
-            self.reduce_balance(25 * len(otherplayers))
+            player.reduce_balance(25 * len(otherplayers))
             for p in otherplayers:
                 p.add_balance(25)
         elif self.card_name == 'Chairman of the Board':
-            self.reduce_balance(50 * len(otherplayers))
+            player.reduce_balance(50 * len(otherplayers))
             for p in otherplayers:
                 p.add_balance(50)
         elif self.card_name == "It's your bithday":

@@ -31,7 +31,7 @@ class State:
 
     def get_state(self):
         pass
-        # flatten player info y other player info
+        # TODO flatten player info y other player info
 
     def add_property(self, prop: Card):
         color_pos = self.pos[prop.color_group]

@@ -23,7 +23,7 @@ class State:
         # color 10:  2: 6/12 12/12
         #           3: 4/12 8/12/ 12/12
         # hip color 10:
-        # balance/2000
+        # balance/MAX_BALANCE
         # posicion/40
 
         #4 columnas 1 para cada jugador

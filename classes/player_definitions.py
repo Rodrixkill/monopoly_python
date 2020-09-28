@@ -24,21 +24,20 @@ class Player:
         self.amount_owed = 0  # int
         self.bankruptcy = False  # bool
         self.turns_in_jail = 0        #int
-        #TODO
         self.properties_by_color = {
-            "Orange": [],
-            "Pink": []
+            "Orange": [0],
+            "Pink": [0],
+            "Light Blue":[0],
+            "Railroad":[0],
+            "Utilities":[0],
+            "Brown":[0],
+            "Red":[0],
+            "Yellow":[0],
+            "Green":[0],
+            "Blue":[0]
         }
         self.dice1= 0 # int
         self.dice2= 0 # int
-        self.brown = 0  # int
-        self.lightblue = 0  # int
-        self.pink = 0  # int
-        self.orange = 0  # int
-        self.red = 0  # int
-        self.yellow = 0  # int
-        self.green = 0  # int
-        self.blue = 0  # int
         self.verbose = verbose
         self.game = None
 
@@ -56,7 +55,7 @@ class Player:
         self.dice1=dice1
         self.dice2=dice2
         return dice1, dice2
-    # TODO cada vez que nos movemos deberiamos checkear que acciones podemos tomar no?
+
     def move_player(self, dice_amt):
         """
         Moves the player by the amount returned by rolling two die.
@@ -88,26 +87,7 @@ class Player:
         if card.card_cost <= self.balance:
             card.owner = self.name
             self.reduce_balance(card.card_cost)
-            if card.color_group == "Railroad":
-                self.railroads_owned += 1
-            elif card.color_group == "Utilities":
-                self.utilities_owned += 1
-            elif card.color_group == "Brown":
-                self.brown += 1
-            elif card.color_group == "Light Blue":
-                self.lightblue += 1
-            elif card.color_group == "Pink":
-                self.pink += 1
-            elif card.color_group == "Orange":
-                self.orange += 1
-            elif card.color_group == "Red":
-                self.red += 1
-            elif card.color_group == "Yellow":
-                self.yellow += 1
-            elif card.color_group == "Green":
-                self.green += 1
-            elif card.color_group == "Blue":
-                self.blue += 1
+            self.properties_by_color[card.color_group][0]+=1
 
     def buy_house(self):
         pass
@@ -123,26 +103,7 @@ class Player:
         if card.card_cost <= self.balance:
             card.owner = self.name
             self.reduce_balance(money)
-            if card.color_group == "Railroad":
-                self.railroads_owned += 1
-            elif card.color_group == "Utilities":
-                self.utilities_owned += 1
-            elif card.color_group == "Brown":
-                self.brown += 1
-            elif card.color_group == "Light Blue":
-                self.lightblue += 1
-            elif card.color_group == "Pink":
-                self.pink += 1
-            elif card.color_group == "Orange":
-                self.orange += 1
-            elif card.color_group == "Red":
-                self.red += 1
-            elif card.color_group == "Yellow":
-                self.yellow += 1
-            elif card.color_group == "Green":
-                self.green += 1
-            elif card.color_group == "Blue":
-                self.blue += 1
+            self.properties_by_color[card.color_group][0]+=1
 
     def check_pos(self, board):
         """
@@ -176,39 +137,39 @@ class Player:
         """
         rent_amt = 0
         if card.color_group == "Railroad":  # 25,50,100,200
-            if card.owner.railroads_owned == 1:
+            if card.owner.properties_by_color["Railroad"][0] == 1:
                 rent_amt = 25
-            elif card.owner.railroads_owned == 2:
+            elif card.owner.properties_by_color["Railroad"][0] == 2:
                 rent_amt = 50
-            elif card.owner.railroads_owned == 3:
+            elif card.owner.properties_by_color["Railroad"][0] == 3:
                 rent_amt = 100
-            elif card.owner.railroads_owned == 4:
+            elif card.owner.properties_by_color["Railroad"][0] == 4:
                 rent_amt = 200
         elif card.color_group == "Utilities":
             n = self.dice1 + self.dice2
-            if card.owner.utilities_owned == 1:
+            if card.owner.properties_by_color["Utilities"][0] == 1:
                 rent_amt = 4 * n
-            elif card.owner.utilities_owned == 2:
+            elif card.owner.properties_by_color["Utilities"][0] == 2:
                 rent_amt = 10 * n
         elif card.mortgaged == False:
             total_houses = card.houses_built
             rent_amt = card.rent_prices[total_houses]
             if total_houses == 0:
-                if card.color_group == "Brown" and card.owner.brown == 2:
+                if card.color_group == "Brown" and card.owner.properties_by_color["Brown"][0] == 2:
                     rent_amt *= 2
-                elif card.color_group == "Light Blue" and card.owner.lightblue == 3:
+                elif card.color_group == "Light Blue" and card.owner.properties_by_color["Light Blue"][0] == 3:
                     rent_amt *= 2
-                elif card.color_group == "Pink" and card.owner.pink == 3:
+                elif card.color_group == "Pink" and card.owner.properties_by_color["Pink"][0]== 3:
                     rent_amt *= 2
-                elif card.color_group == "Orange" and card.owner.orange == 3:
+                elif card.color_group == "Orange" and card.owner.properties_by_color["Orange"][0] == 3:
                     rent_amt *= 2
-                elif card.color_group == "Red" and card.owner.red == 3:
+                elif card.color_group == "Red" and card.owner.properties_by_color["Red"][0] == 3:
                     rent_amt *= 2
-                elif card.color_group == "Yellow" and card.owner.yellow == 3:
+                elif card.color_group == "Yellow" and card.owner.properties_by_color["Yellow"][0] == 3:
                     rent_amt *= 2
-                elif card.color_group == "Green" and card.owner.green == 3:
+                elif card.color_group == "Green" and card.owner.properties_by_color["Green"][0] == 3:
                     rent_amt *= 2
-                elif card.color_group == "Blue" and card.owner.blue == 2:
+                elif card.color_group == "Blue" and card.owner.properties_by_color["Blue"][0] == 2:
                     rent_amt *= 2
         self.reduce_balance(rent_amt)
         card.owner.add_balance(rent_amt)
@@ -266,26 +227,7 @@ class Player:
         if len(self.cards_owned):
             for card in self.cards_owned:
                 card.owner = player.name
-                if card.color_group == "Railroad":
-                    player.railroads_owned += 1
-                elif card.color_group == "Utilities":
-                    player.utilities_owned += 1
-                elif card.color_group == "Brown":
-                    player.brown += 1
-                elif card.color_group == "Light Blue":
-                    player.lightblue += 1
-                elif card.color_group == "Pink":
-                    player.pink += 1
-                elif card.color_group == "Orange":
-                    player.orange += 1
-                elif card.color_group == "Red":
-                    player.red += 1
-                elif card.color_group == "Yellow":
-                    player.yellow += 1
-                elif card.color_group == "Green":
-                    player.green += 1
-                elif card.color_group == "Blue":
-                    player.blue += 1
+                player.properties_by_color[card.color_group][0] += 1
         self.bankruptcy = True
 
     def check_if_bankrupt(self, amt_owed):  # TODO
@@ -373,69 +315,13 @@ class Player:
         if len(listP1):
             for card in listP1:
                 card.owner = player2.name
-                if card.color_group == "Railroad":
-                    player2.railroads_owned += 1
-                    self.railroads_owned -= 1
-                elif card.color_group == "Utilities":
-                    player2.utilities_owned += 1
-                    self.utilities_owned -= 1
-                elif card.color_group == "Brown":
-                    player2.brown += 1
-                    self.brown -= 1
-                elif card.color_group == "Light Blue":
-                    player2.lightblue += 1
-                    self.lightblue -= 1
-                elif card.color_group == "Pink":
-                    player2.pink += 1
-                    self.pink -= 1
-                elif card.color_group == "Orange":
-                    player2.orange += 1
-                    self.orange -= 1
-                elif card.color_group == "Red":
-                    player2.red += 1
-                    self.red -= 1
-                elif card.color_group == "Yellow":
-                    player2.yellow += 1
-                    self.yellow -= 1
-                elif card.color_group == "Green":
-                    player2.green += 1
-                    self.green -= 1
-                elif card.color_group == "Blue":
-                    player2.blue += 1
-                    self.blue -= 1
+                player2.properties_by_color[card.color_group][0] += 1
+                self.properties_by_color[card.color_group][0] -= 1
         if len(listP2):
             for card in listP2:
                 card.owner = self.name
-                if card.color_group == "Railroad":
-                    player2.railroads_owned -= 1
-                    self.railroads_owned += 1
-                elif card.color_group == "Utilities":
-                    player2.utilities_owned -= 1
-                    self.utilities_owned += 1
-                elif card.color_group == "Brown":
-                    player2.brown -= 1
-                    self.brown += 1
-                elif card.color_group == "Light Blue":
-                    player2.lightblue -= 1
-                    self.lightblue += 1
-                elif card.color_group == "Pink":
-                    player2.pink -= 1
-                    self.pink += 1
-                elif card.color_group == "Orange":
-                    player2.orange -= 1
-                    self.orange += 1
-                elif card.color_group == "Red":
-                    player2.red -= 1
-                    self.red += 1
-                elif card.color_group == "Yellow":
-                    player2.yellow -= 1
-                    self.yellow += 1
-                elif card.color_group == "Green":
-                    player2.green -= 1
-                    self.green += 1
-                elif card.color_group == "Blue":
-                    player2.blue -= 1
-                    self.blue += 1
+                player2.properties_by_color[card.color_group][0] -= 1
+                self.properties_by_color[card.color_group][0] += 1
 
     def total_net_worth(self):
         net_worth=self.balance

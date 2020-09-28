@@ -422,23 +422,6 @@ class Player:
     def V(self, state):
         return random.random() * 2 - 1
 
-    def check_position(self, prop, verbose):
-        if prop.card_name == 'Luxury Tax':
-            self.reduce_balance(100)
-            if verbose:
-                print('%s pays 100$ for Luxury Tax' % self.name)
-            return 100
-        elif prop.card_name == 'Income Tax':
-            self.reduce_balance(200)
-            if verbose:
-                print('%s pays 200$ for Income Tax' % self.name)
-            return 200
-        elif prop.card_name == 'Go to Jail':
-            self.send_to_jail()
-            if verbose:
-                print('%s goes to jail' % self.name)
-            return 'Go to Jail'
-
     def take_action(self, actions):
         value_action_pairs = [(self.V(action.peek_state()), action) for action in actions]
         value_action_pairs.sort(key=lambda x: x[0], reverse=True)

@@ -23,8 +23,6 @@ def initialize_community_cards():
 
     # move
     go_jail = c_def.Fortune("Go to jail", "Directly to jail", True, False, False, 10, 0)
-    out_jail = c_def.Fortune("Free of jail", "This card may be kept until needed or sold/traded.", False,
-                             False, False, 0, 0)
     go_go = c_def.Fortune("Advance to Go", "Collect $200", True, False, False, 0, 0)
 
     community = [
@@ -36,7 +34,6 @@ def initialize_community_cards():
         fee_hospital,
         receive_insurance,
         receive_tax,
-        out_jail,
         receive_errorbank,
         go_go,
         receive_inherit,

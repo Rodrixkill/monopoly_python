@@ -19,16 +19,16 @@ class Card:
         player.add_balance(self.mortgage_amt)
         self.mortgaged = True
 
-    def buy_mortgage(self,player):
+    def buy_mortgage(self, player):
         """
         Set Mortgage to false and pay the mortgage price plus 10%
         :param player: An instance of the Player class.
         :returns: Assert Error if not completed correctly.
         """
-        mortgage_cost=self.mortgage_amt * 1.10
+        mortgage_cost = self.mortgage_amt * 1.10
         assert player.balance >= mortgage_cost
         player.reduce_balance(mortgage_cost)
-        self.mortgaged=False
+        self.mortgaged = False
 
     def sell(self, player):
         """
@@ -38,6 +38,9 @@ class Card:
         """
         player.add_balance(self.card_cost)
         self.owner = 'Bank'
+
+    def has_owner(self, player):
+        return self.owner is not 'Bank'
 
     def sell_player(self, player, player2, cost):
         """
@@ -77,8 +80,11 @@ class Card:
         :param player: An instance of the Player class.
         """
         assert self.house_cost <= player.balance or self.houses_built < 5
-        player.balance= player.balance - self.house_cost
+        player.balance = player.balance - self.house_cost
         self.houses_built += 1
+
+    def __str__(self):
+        return '%s(%s)' % (self.card_name, self.color_group)
 
 
 

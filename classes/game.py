@@ -1,22 +1,24 @@
 from typing import List
 
 from classes.player_definitions import Player
+from classes.card_definitions import Card
 from game.information import initialize_cards_and_board
+import classes.actions as acts
 
 NUM_PLAYERS = 4
 TURN_LIMIT = 100
-BIDDING, PAYING, NEXT_TURN = 10, 20, 30
 
 
 class Game:
-    def __init__(self, players: List[Player]):
+    def __init__(self, players: List[Player], verbose=False):
         self.players: List[Player] = players
-        self.board = initialize_cards_and_board()
+        self.board: List[Card] = initialize_cards_and_board()
         self.turns = 0
         self.player_index = -1
         self.doubles_counter = 0
-        self.state = NEXT_TURN
         self.amount_to_pay = 0
+        self.actual_bid = 0
+        self.verbose = verbose
 
     def players_not_in_bankruptcy(self):
         return [player for player in self.players if not player.bankruptcy]
@@ -25,39 +27,134 @@ class Game:
         return self.turns >= TURN_LIMIT or len(self.players_not_in_bankruptcy()) == 1
 
     def winner(self) -> Player:
-        assert(self.game_over())
+        assert (self.game_over())
         players_not_in_bankruptcy = self.players_not_in_bankruptcy()
         if len(players_not_in_bankruptcy) == 1:
             return players_not_in_bankruptcy[0]
         else:
-            max_money = float('-inf')
-            richest_player = None
-            for player in self.players:
-                if player.balance > max_money:
-                    max_money = player.balance
-                    richest_player = player
-            return richest_player
+            richest_players = sorted(self.players, key=lambda x: x.total_net_worth(), reverse=True)
+            return richest_players[0]
 
-    def play(self, verbose=False):
+    def play(self):
+        for player in self.players:
+            player.reset()
+
         while not self.game_over():
-            if self.state is NEXT_TURN:
-                self.player_index = (self.player_index + 1) % NUM_PLAYERS
             player = self.players[self.player_index]
+
+            if player.in_jail:
+                actions = [acts.LeaveJailPaying(player), acts.LeaveJailRolling(player)]
+                action = player.take_action(actions)
+                continue
+
             dice1, dice2 = player.roll_dice()
+            if self.verbose:
+                print('%d rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
             if dice1 == dice2:
                 self.doubles_counter += 1
+            else:
+                self.doubles_counter = 0
 
             if self.doubles_counter == 3:
                 self.doubles_counter = 0
+                self.player_index = (self.player_index + 1) % 4
                 player.send_to_jail()
+                if self.verbose:
+                    print('%s was sent to jail for rolling doubles three times in a row' % player.name)
                 continue
 
+            last_pos = player.current_pos
             player.move_player(dice1 + dice2)
-            action = player.take_action(self)
 
+            if player.current_pos < last_pos:
+                player.add_balance(200)
+                if self.verbose:
+                    print('%s receives 200$ for passing GO' % player.name)
 
-        if verbose:
+        if self.verbose:
             print("%s wins!" % self.winner().name)
 
-    def actions(self):
-        pass
+    def play_turn(self, player):
+        if player.in_jail:
+            actions = [acts.LeaveJailPaying(player), acts.LeaveJailRolling(player)]
+            action = player.take_action(actions)
+            action.do()
+            if self.verbose:
+                action.describe()
+            return
+
+        dice1, dice2 = player.roll_dice()
+        if self.verbose:
+            print('%d rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
+        if dice1 == dice2:
+            self.doubles_counter += 1
+        else:
+            self.doubles_counter = 0
+
+        if self.doubles_counter == 3:
+            self.doubles_counter = 0
+            self.player_index = (self.player_index + 1) % 4
+            player.send_to_jail()
+            if self.verbose:
+                print('%s was sent to jail for rolling doubles three times in a row' % player.name)
+            return
+
+        last_pos = player.current_pos
+        player.move_player(dice1 + dice2)
+
+        if player.current_pos < last_pos:
+            player.add_balance(200)
+            if self.verbose:
+                print('%s receives 200$ for passing GO' % player.name)
+
+        prop_landed = self.board[player.current_pos]
+        if self.verbose:
+            print('%s landed on %s' % (player.name, prop_landed))
+
+        actions: List[acts.Action] = [acts.BuyMortgageProperty(player, prop)
+                                      if prop.mortgaged else acts.MortgageProperty(player, prop)
+                                      for prop in player.cards_owned]
+
+        tax = 0
+        if prop_landed.card_name == 'Luxury Tax':
+            tax = 100
+        elif prop_landed.card_name == 'Income Tax':
+            tax = 200
+
+        while player.balance < tax:
+            action = player.take_action(actions)
+            actions.remove(action)
+            action.do(self.verbose)
+
+        player.reduce_balance(tax)
+        if self.verbose:
+            print('%s pays tax of %s$' % (player.name, tax))
+
+        if not prop_landed.has_owner():
+            actions.append(acts.BuyProperty(player, prop_landed))
+
+
+    def start_auction(self, prop: Card):
+        m = 0
+        player_index = self.player_index
+        winner_index = self.player_index
+
+        if self.verbose:
+            print('Auction for %s started at 0, actual winner: %s' % (prop, self.players[winner_index].name))
+
+        while True:
+            player_index = (player_index + 1) % 4
+            if player_index == winner_index:
+                break
+
+            player = self.players[player_index]
+            if player.want_to_bid(prop, int(prop.card_cost * (m + 0.2))):
+                winner_index = player_index
+                m += 0.2
+                if self.verbose:
+                    print('%s bids for %s with %d' % (player.name, prop, int(prop.card_cost * m)))
+
+        winner = self.players[winner_index]
+        if self.verbose:
+            print('%s wins auction for %s with %d' % (winner.name, prop, int(prop.card_cost * m)))
+        winner.buy_property_to_price(prop, int(prop.card_cost * m))

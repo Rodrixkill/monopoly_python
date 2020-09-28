@@ -2,22 +2,33 @@
 Contains the Player class and associated functions.
 """
 import random
+from typing import List
+
 from classes import card_definitions as c_def
+from classes.card_definitions import  Card
+import classes.actions as acts
+
 
 
 class Player:
     def __init__(self, name):
-        self.name = name                # str
-        self.balance = 1500             # int
-        self.cards_owned = []           # list
-        self.current_pos = 0            # int (index)
-        self.in_jail = False            # bool
-        self.railroads_owned = 0        # int
-        self.utilities_owned = 0        # int
-        self.doubles_counter = 0        # int
-        self.amount_owed = 0            # int
+        self.name = name  # str
+        self.balance = 1500  # int
+        self.cards_owned: List[Card] = []  # list
+        self.current_pos = 0  # int (index)
+        self.in_jail = False  # bool
+        self.railroads_owned = 0  # int
+        self.utilities_owned = 0  # int
+        self.doubles_counter = 0  #int
+        self.amount_owed = 0  # int
         self.bankruptcy = False  # bool
-        self.brown = 0              # int
+        #TODO turnos e la carcel
+        #TODO
+        self.properties_by_color = {
+            "Orange": [],
+            "Pink": []
+        }
+        self.brown = 0  # int
         self.lightblue = 0  # int
         self.pink = 0  # int
         self.orange = 0  # int
@@ -25,6 +36,9 @@ class Player:
         self.yellow = 0  # int
         self.green = 0  # int
         self.blue = 0  # int
+
+    def reset(self):
+        pass #TODO
 
     def roll_dice(self):
         """
@@ -34,10 +48,8 @@ class Player:
         random.seed()
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
-        if dice1 == dice2:
-            self.doubles_counter += 1
-        n = dice1 + dice2
-        return n
+        #TODO guardar dados
+        return dice1, dice2
 
     def move_player(self, dice_amt):
         """
@@ -46,7 +58,7 @@ class Player:
         :return: an int that represents the updated position of the player on the board.
         """
         self.current_pos += dice_amt
-        self.current_pos= self.current_pos % 40
+        self.current_pos = self.current_pos % 40
         return self.current_pos
 
     def move_player_card(self, destination):
@@ -58,13 +70,15 @@ class Player:
         self.current_pos = destination
         return self.current_pos
 
-    def buy_property(self,card):
+    def buy_property(self, card):
         """
         Buy card to make it your property
         :param card:
         :return:
         """
         assert card.owner == 'Bank'
+        assert card.card_cost <= self.balance
+
         if card.card_cost <= self.balance:
             card.owner = self.name
             self.reduce_balance(card.card_cost)
@@ -89,7 +103,11 @@ class Player:
             elif card.color_group == "Blue":
                 self.blue += 1
 
-    def buy_property_to_price(self,card,money):
+    def buy_house(self):
+        pass
+        #TODO se compra por color y se asigna parejamente a cada propiedad
+
+    def buy_property_to_price(self, card, money):
         """
         Buy card to make it your property
         :param card:
@@ -129,7 +147,7 @@ class Player:
         self.current_pos = self.current_pos % 40
         brd_property = board[self.current_pos]
         if brd_property.owner == 'Bank':
-            #TODO buy or not buy
+            # TODO buy or not buy
             return 0
         else:  # and brd_property.owner.name != self.name:
             if brd_property.owner.name != self.name:
@@ -150,49 +168,50 @@ class Player:
         :param card: an instance of the Card class.
         :return: None.
         """
-        rent_amt=0
-        if card.color_group == "Railroad": #25,50,100,200
+        rent_amt = 0
+        if card.color_group == "Railroad":  # 25,50,100,200
             if card.owner.railroads_owned == 1:
-                rent_amt=25
+                rent_amt = 25
             elif card.owner.railroads_owned == 2:
-                rent_amt=50
+                rent_amt = 50
             elif card.owner.railroads_owned == 3:
-                rent_amt=100
+                rent_amt = 100
             elif card.owner.railroads_owned == 4:
                 rent_amt = 200
         elif card.color_group == "Utilities":
+            #TODO es el dado tirado
             random.seed()
             dice_1 = random.randint(1, 6)
             dice_2 = random.randint(1, 6)
-            n = dice_1+dice_2
+            n = dice_1 + dice_2
             if card.owner.utilities_owned == 1:
-                rent_amt = 4*n
+                rent_amt = 4 * n
             elif card.owner.utilities_owned == 2:
-                rent_amt = 10*n
+                rent_amt = 10 * n
         elif card.mortgaged == False:
-            total_houses=card.houses_built
+            total_houses = card.houses_built
             rent_amt = card.rent_prices[total_houses]
             if total_houses == 0:
                 if card.color_group == "Brown" and card.owner.brown == 2:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Light Blue" and card.owner.lightblue == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Pink" and card.owner.pink == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Orange" and card.owner.orange == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Red" and card.owner.red == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Yellow" and card.owner.yellow == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Green" and card.owner.green == 3:
-                    rent_amt *=2
+                    rent_amt *= 2
                 elif card.color_group == "Blue" and card.owner.blue == 2:
-                    rent_amt *=2
+                    rent_amt *= 2
         self.reduce_balance(rent_amt)
         card.owner.add_balance(rent_amt)
 
-    def reduce_balance(self, amount): #TODO
+    def reduce_balance(self, amount):  # TODO
         """
         Reduces the player's balance.
         :param amount: int, the amount of money to reduce the player's balance by.
@@ -227,7 +246,7 @@ class Player:
 
         self.bankruptcy = True
 
-    def bankrupt_player_to_player(self,player):
+    def bankrupt_player_to_player(self, player):
         """
         The designed player collects all the player's owned properties and sets their bankruptcy status to True.
         :return: None.
@@ -257,10 +276,10 @@ class Player:
                     player.green += 1
                 elif card.color_group == "Blue":
                     player.blue += 1
-        #TODO All atributes to 0?
+        # TODO All atributes to 0?
         self.bankruptcy = True
 
-    def check_if_bankrupt(self, amt_owed): #TODO
+    def check_if_bankrupt(self, amt_owed):  # TODO
         """
         Checks if the player is bankrupt (i.e. can the player afford what they are being charged?).
         :param amt_owed: int, the amount the player is being charged.
@@ -325,7 +344,7 @@ class Player:
         dice_result = self.roll_dice()
         self.move_player(dice_result)
 
-    def trade_between_players(self,player2,listP1,listP2,m1,m2):
+    def trade_between_players(self, player2, listP1, listP2, m1, m2):
         self.reduce_balance(m1)
         player2.reduce_balance(m2)
         self.add_balance(m2)
@@ -397,5 +416,35 @@ class Player:
                     player2.blue -= 1
                     self.blue += 1
 
-    def take_action(self, game):
-        pass
+    def total_net_worth(self):
+        return self.balance #TODO valor casas propiedades
+
+    def V(self, state):
+        return random.random() * 2 - 1
+
+    def check_position(self, prop, verbose):
+        if prop.card_name == 'Luxury Tax':
+            self.reduce_balance(100)
+            if verbose:
+                print('%s pays 100$ for Luxury Tax' % self.name)
+            return 100
+        elif prop.card_name == 'Income Tax':
+            self.reduce_balance(200)
+            if verbose:
+                print('%s pays 200$ for Income Tax' % self.name)
+            return 200
+        elif prop.card_name == 'Go to Jail':
+            self.send_to_jail()
+            if verbose:
+                print('%s goes to jail' % self.name)
+            return 'Go to Jail'
+
+    def take_action(self, actions):
+        value_action_pairs = [(self.V(action.peek_state()), action) for action in actions]
+        value_action_pairs.sort(key=lambda x: x[0], reverse=True)
+        return value_action_pairs[0][1]
+
+    def want_to_bid(self, prop, actual_bid):
+        #TODO peek posible state
+        posible_state, actual_state = None, None
+        return self.V(posible_state) > self.V(actual_state)

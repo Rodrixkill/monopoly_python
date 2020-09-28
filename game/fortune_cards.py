@@ -13,6 +13,7 @@ def initialize_fortune_cards():
     go_illinois = f_def.Fortune("Advance to Illinois Ave", "Go to Illinois Ave, If you pass Go, collect $200",
                                 True, False, False, 24, 0)
 
+    #CHECK
     near_utility = f_def.Fortune("Advance to nearest utility",
                                  "If unowned, you can buy it. If owned, throw dice and pay 10 times the amount thrown",
                                  True, False, False, 12 | 28, 0)
@@ -20,7 +21,7 @@ def initialize_fortune_cards():
     out_jail = f_def.Fortune("Get out of jail", "This card may be kept until needed, or traded/sold", True, False,
                              False, 0, 0)
 
-    pay_all = f_def.Fortune("Chairman of the Board", "Pay each player $50", False, True, False, 0, 50)
+    pay_all = f_def.Fortune("Chairman of the Board", "Pay each player $50", False, False, False, 0, 50)
 
     bank_pay = f_def.Fortune("Bank pays you", "Dividend of $50", False, False, True, 0, 50)
 
@@ -33,7 +34,7 @@ def initialize_fortune_cards():
 
     won_competition = f_def.Fortune("Won a competition", "Collect $100", False, False, True, 0, 100)
 
-    back_three = f_def.Fortune("Go Back", "Back 3 spaces", True, False, False, -3, 0)
+    back_three = f_def.Fortune("Go Back", "Back 3 spaces", False, False, False, -3, 0)
 
     near_railroad = f_def.Fortune("Advance to nearest railroad",
                                   "If unowned, you can buy it. If owned, pay owner twice the rental", True, True, False,

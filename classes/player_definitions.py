@@ -11,7 +11,7 @@ import classes.actions as acts
 
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, name, verbose=False):
         self.name = name  # str
         self.balance = 1500  # int
         self.cards_owned: List[Card] = []  # list
@@ -38,6 +38,7 @@ class Player:
         self.yellow = 0  # int
         self.green = 0  # int
         self.blue = 0  # int
+        self.verbose = verbose
 
     def reset(self):
         pass #TODO
@@ -217,6 +218,11 @@ class Player:
         :return: None.
         """
         if self.balance < amount:
+            while len(actions) > 0 or self.balance < amount:
+                actions = [acts.MortgageProperty(self, prop) for prop in self.cards_owned if not prop.mortgaged]
+                action = self.take_action(actions)
+                actions.remove(action)
+                action.do(self.verbose)
             """
             print("Your balance is insufficient for this action.")
             bankrupt = self.check_if_bankrupt(amount)
@@ -228,6 +234,9 @@ class Player:
                 else:
                     pass  # mortgage()  TODO: implement this function.
             """
+            #TODO DECLARAR BANCAROTA
+            # if balance <
+            #     bancarota
         else:
             self.balance -= amount
 
@@ -436,7 +445,8 @@ class Player:
     def V(self, state):
         return random.random() * 2 - 1
 
-    def take_action(self, actions):
+    def take_action(self, actions, game):
+        #TODO STATE(GAME)
         value_action_pairs = [(self.V(action.peek_state()), action) for action in actions]
         value_action_pairs.sort(key=lambda x: x[0], reverse=True)
         return value_action_pairs[0][1]
@@ -445,3 +455,11 @@ class Player:
         #TODO peek posible state
         posible_state, actual_state = None, None
         return self.V(posible_state) > self.V(actual_state)
+
+class RLPlayer(Player):
+    def V(self, state):
+        pass
+
+class SLPlayer(Player):
+    def V(self, state):
+        pass

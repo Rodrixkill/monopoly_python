@@ -2,11 +2,14 @@ from typing import List
 
 from classes.player_definitions import Player
 from classes.card_definitions import Card
+from classes.fortune_definitions import Fortune
 from game.information import initialize_cards_and_board
+from game.community_cards import initialize_community_cards
+from game.fortune_cards import initialize_fortune_cards
 import classes.actions as acts
 
 NUM_PLAYERS = 4
-TURN_LIMIT = 100
+TURN_LIMIT = 10000
 
 
 class Game:
@@ -42,34 +45,7 @@ class Game:
         while not self.game_over():
             player = self.players[self.player_index]
 
-            if player.in_jail:
-                actions = [acts.LeaveJailPaying(player), acts.LeaveJailRolling(player)]
-                action = player.take_action(actions)
-                continue
-
-            dice1, dice2 = player.roll_dice()
-            if self.verbose:
-                print('%d rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
-            if dice1 == dice2:
-                self.doubles_counter += 1
-            else:
-                self.doubles_counter = 0
-
-            if self.doubles_counter == 3:
-                self.doubles_counter = 0
-                self.player_index = (self.player_index + 1) % 4
-                player.send_to_jail()
-                if self.verbose:
-                    print('%s was sent to jail for rolling doubles three times in a row' % player.name)
-                continue
-
-            last_pos = player.current_pos
-            player.move_player(dice1 + dice2)
-
-            if player.current_pos < last_pos:
-                player.add_balance(200)
-                if self.verbose:
-                    print('%s receives 200$ for passing GO' % player.name)
+            self.play_turn(player)
 
         if self.verbose:
             print("%s wins!" % self.winner().name)
@@ -126,12 +102,20 @@ class Game:
             actions.remove(action)
             action.do(self.verbose)
 
+        #community
+
+
         player.reduce_balance(tax)
         if self.verbose:
             print('%s pays tax of %s$' % (player.name, tax))
 
         if not prop_landed.has_owner():
             actions.append(acts.BuyProperty(player, prop_landed))
+        else:
+            actions.append(acts.PayRent(player, prop_landed))
+
+            # while player.balance <= debe:
+
 
 
     def start_auction(self, prop: Card):

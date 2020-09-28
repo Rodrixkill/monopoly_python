@@ -10,7 +10,7 @@ class Action:
     def do(self, verbose):
         pass
 
-    def peek_state(self):
+    def peek_state(self, state):
         pass
 
 
@@ -27,6 +27,10 @@ class BuyProperty(ActionOnProperty):
         if verbose:
             print('%s buys property %s for %d' % (self.player.name, self.prop, self.prop.card_cost))
             print('%s\'s new balance: %d' % (self.player, self.player.balance))
+
+    def peek_state(self, state):
+        # return state.add_property(player, prop)
+        pass
 
 
 class MortgageProperty(ActionOnProperty):

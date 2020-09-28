@@ -22,12 +22,14 @@ class Player:
         self.doubles_counter = 0  #int
         self.amount_owed = 0  # int
         self.bankruptcy = False  # bool
-        #TODO turnos en la carcel
+        self.turns_in_jail = 0        #int
         #TODO
         self.properties_by_color = {
             "Orange": [],
             "Pink": []
         }
+        self.dice1= 0 # int
+        self.dice2= 0 # int
         self.brown = 0  # int
         self.lightblue = 0  # int
         self.pink = 0  # int
@@ -48,7 +50,8 @@ class Player:
         random.seed()
         dice1 = random.randint(1, 6)
         dice2 = random.randint(1, 6)
-        #TODO guardar dados
+        self.dice1=dice1
+        self.dice2=dice2
         return dice1, dice2
 
     def move_player(self, dice_amt):
@@ -179,11 +182,7 @@ class Player:
             elif card.owner.railroads_owned == 4:
                 rent_amt = 200
         elif card.color_group == "Utilities":
-            #TODO es el dado tirado
-            random.seed()
-            dice_1 = random.randint(1, 6)
-            dice_2 = random.randint(1, 6)
-            n = dice_1 + dice_2
+            n = self.dice1 + self.dice2
             if card.owner.utilities_owned == 1:
                 rent_amt = 4 * n
             elif card.owner.utilities_owned == 2:
@@ -276,7 +275,6 @@ class Player:
                     player.green += 1
                 elif card.color_group == "Blue":
                     player.blue += 1
-        # TODO All atributes to 0?
         self.bankruptcy = True
 
     def check_if_bankrupt(self, amt_owed):  # TODO
@@ -325,13 +323,16 @@ class Player:
         Releases the player from jail.
         :return: None.
         """
-        self.doubles_counter = 0
         self.roll_dice()
-        if self.doubles_counter == 1:
+        if self.turns_in_jail == 3:
+            self.release_from_jail_paying()
+        elif self.dice1 == self.dice2:
             self.doubles_counter = 0
             self.in_jail = False
             dice_result = self.roll_dice()
             self.move_player(dice_result)
+        else:
+            self.turns_in_jail+=1
 
     def release_from_jail_paying(self):
         """
@@ -345,6 +346,15 @@ class Player:
         self.move_player(dice_result)
 
     def trade_between_players(self, player2, listP1, listP2, m1, m2):
+        """
+        Trade Between players giving themselves properties or money
+        :param player2:
+        :param listP1:
+        :param listP2:
+        :param m1:
+        :param m2:
+        :return:
+        """
         self.reduce_balance(m1)
         player2.reduce_balance(m2)
         self.add_balance(m2)
@@ -417,7 +427,11 @@ class Player:
                     self.blue += 1
 
     def total_net_worth(self):
-        return self.balance #TODO valor casas propiedades
+        net_worth=self.balance
+        for card in self.cards_owned:
+            net_worth+=(card.card_cost/2)
+            net_worth+=(card.houses_built*card.house_cost)/2
+        return net_worth
 
     def V(self, state):
         return random.random() * 2 - 1

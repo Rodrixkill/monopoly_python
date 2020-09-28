@@ -27,6 +27,10 @@ class Fortune:
             self.reduce_balance(50 * len(otherplayers))
             for p in otherplayers:
                 p.add_balance(50)
+        elif self.card_name == "It's your bithday":
+            for p in otherplayers:
+                p.reduce_balance(10)
+            player.add_balance(10*len(otherplayers))
         elif self.card_name == 'Make repairs':
             for card in player.cards_owned:
                 if card.houses_built > 0:
@@ -34,6 +38,13 @@ class Fortune:
                         player.reduce_balance(100)
                     else:
                         player.reduce_balance(25*card.houses_built)
+        elif self.card_name == "Street repairs":
+            for card in player.cards_owned:
+                if card.houses_built > 0:
+                    if card.houses_built == 5:
+                        player.reduce_balance(115)
+                    else:
+                        player.reduce_balance(40*card.houses_built)
         elif self.card_name == 'Go Back':
             player.move_player(-3)
         elif self.card_name == 'Advance to nearest railroad' or self.card_name == "Advance to nearest utility":

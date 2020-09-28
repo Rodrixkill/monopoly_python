@@ -42,7 +42,7 @@ def initialize_fortune_cards():
 
     pay_tax = f_def.Fortune("Pay tax", "Poor tax of $15", False, True, False, 0, 15)
 
-    go_go = f_def.Fortune("Advance to go", "Collect $100", True, False, True, 0, 200)
+    go_go = f_def.Fortune("Advance to go", "Collect $100", True, False, True, 0, 100)
 
     fortune = [
         go_boardwalk,

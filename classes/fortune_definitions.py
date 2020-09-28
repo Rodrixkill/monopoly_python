@@ -36,6 +36,16 @@ class Fortune:
                         player.reduce_balance(25*card.houses_built)
         elif self.card_name == 'Go Back':
             player.move_player(-3)
-        elif self.card_name == 'Advance to nearest railroad':
+        elif self.card_name == 'Advance to nearest railroad' or self.card_name == "Advance to nearest utility":
+            val= self.nGE(player.current_pos,self.destination)
+            if player.current_pos >= val:
+                player.add_balance(200)
+            player.move_player_card(val)
 
-
+    def nGE(val,arr):
+        next = min(arr)
+        for i in range(len(arr)):
+            if arr[i] > val:
+                next = arr[i]
+                break
+        return next

@@ -22,7 +22,7 @@ class Player:
         self.doubles_counter = 0  #int
         self.amount_owed = 0  # int
         self.bankruptcy = False  # bool
-        #TODO turnos e la carcel
+        #TODO turnos en la carcel
         #TODO
         self.properties_by_color = {
             "Orange": [],

@@ -19,15 +19,15 @@ def initialize_fortune_cards():
                              False, 0, 0)
     go_jail = f_def.Fortune("Go to jail", "Directly to jail", True, False, False, 10, 0)
     go_go = f_def.Fortune("Advance to go", "Collect $100", True, False, True, 0, 200)
-    back_threespaces = f_def.Fortune("Go Back", "Back 3 spaces", True, False, False, -3, 0)
+    back_threespaces = f_def.Fortune("Go Back", "Back 3 spaces", False, False, False, -3, 0)
 
     # utilityAndRailroads
     #CHECK
     near_utility = f_def.Fortune("Advance to nearest utility",
                                  "If unowned, you can buy it. If owned, throw dice and pay 10 times the amount thrown",
-                                 True, False, False, [12, 28], 0)
+                                 False, False, False, [12, 28], 0)
     near_railroad = f_def.Fortune("Advance to nearest railroad",
-                                  "If unowned, you can buy it. If owned, pay owner twice the rental", True, True, False,
+                                  "If unowned, you can buy it. If owned, pay owner twice the rental", False, False, False,
                                   [5, 15, 25], 0)
 
     # receive
@@ -36,8 +36,8 @@ def initialize_fortune_cards():
     won_competition = f_def.Fortune("Won a competition", "Collect $100", False, False, True, 0, 100)
 
     # pay
-    pay_all = f_def.Fortune("Chairman of the Board", "Pay each player $50", False, True, False, 0, 50)
-    pay_repairs = f_def.Fortune("Make repairs", "For each house pay $25, For each hotel $100.", False, True, False, 0, 0)
+    pay_all = f_def.Fortune("Chairman of the Board", "Pay each player $50", False, False, False, 0, 50)
+    pay_repairs = f_def.Fortune("Make repairs", "For each house pay $25, For each hotel $100.", False, False, False, 0, 0)
     pay_tax = f_def.Fortune("Pay tax", "Poor tax of $15", False, True, False, 0, 15)
 
     fortune = [

@@ -1,5 +1,6 @@
 from classes.card_definitions import Card
 from classes.player_definitions import Player
+from classes.state import State
 
 
 class Action:
@@ -10,7 +11,7 @@ class Action:
     def do(self, verbose):
         pass
 
-    def peek_state(self, state):
+    def peek_state(self, state: State):
         pass
 
 
@@ -29,8 +30,7 @@ class BuyProperty(ActionOnProperty):
             print('%s\'s new balance: %d' % (self.player, self.player.balance))
 
     def peek_state(self, state):
-        # return state.add_property(player, prop)
-        pass
+        return state.add_property(self.prop)
 
 
 class MortgageProperty(ActionOnProperty):

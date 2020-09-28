@@ -5,7 +5,8 @@ import random
 from typing import List
 
 from classes import card_definitions as c_def
-from classes.card_definitions import  Card
+from classes.card_definitions import Card
+from classes.state import State
 import classes.actions as acts
 
 
@@ -39,6 +40,7 @@ class Player:
         self.green = 0  # int
         self.blue = 0  # int
         self.verbose = verbose
+        self.game = None
 
     def reset(self):
         pass #TODO
@@ -445,9 +447,9 @@ class Player:
     def V(self, state):
         return random.random() * 2 - 1
 
-    def take_action(self, actions, game):
-        #TODO STATE(GAME)
-        value_action_pairs = [(self.V(action.peek_state()), action) for action in actions]
+    def take_action(self, actions):
+        other_players = [p for p in self.game.players if p is not self]
+        value_action_pairs = [(self.V(action.peek_state(State(self, other_players))), action) for action in actions]
         value_action_pairs.sort(key=lambda x: x[0], reverse=True)
         return value_action_pairs[0][1]
 

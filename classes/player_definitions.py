@@ -53,7 +53,7 @@ class Player:
         self.dice1=dice1
         self.dice2=dice2
         return dice1, dice2
-
+    # TODO cada vez que nos movemos deberiamos checkear que acciones podemos tomar no?
     def move_player(self, dice_amt):
         """
         Moves the player by the amount returned by rolling two die.

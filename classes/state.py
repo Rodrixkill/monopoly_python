@@ -17,41 +17,29 @@ class State:
             "Brown": 2, "Light Blue": 3, "Pink": 3, "Orange": 3, "Red": 3, "Yellow": 3, "Green": 3, "Blue": 2,
             "Railroad": 4, "Utilities": 2
         }
+        self.player_info[self.pos["Balance"]]=player.balance
+        self.player_info[self.pos["Pos"]] = player.current_pos
         for card in player.cards_owned:
+            new_value = 1 / self.max_per_color[card.color_group]
             if card.mortgaged:
                 pos = 10 + self.pos[card.color_group]
-                if self.max_per_color[card.color_group] == 2:
-                    self.player_info[pos] += 6 / 12
-                elif self.max_per_color[card.color_group] == 3:
-                    self.player_info[pos] += 4 / 12
-                elif self.max_per_color[card.color_group] == 4:
-                    self.player_info[pos] += 3 / 12
+                self.player_info[pos] += new_value
             else:
                 pos = self.pos[card.color_group]
-                if self.max_per_color[card.color_group] == 2:
-                    self.player_info[pos] += 6 / 12
-                elif self.max_per_color[card.color_group] == 3:
-                    self.player_info[pos] += 4 / 12
-                elif self.max_per_color[card.color_group] == 4:
-                    self.player_info[pos] += 3 / 12
+                self.player_info[pos] += new_value
+
         for p in other_players:
+            self.other_players_info[p.name][self.pos["Balance"]] = p.balance
+            self.other_players_info[p.name][self.pos["Pos"]] = p.current_pos
             for card in p.cards_owned:
+                new_value = 1 / self.max_per_color[card.color_group]
                 if card.mortgaged:
                     pos = 10 + self.pos[card.color_group]
-                    if self.max_per_color[card.color_group] == 2:
-                        self.other_players_info[p.name][pos] += 6 / 12
-                    elif self.max_per_color[card.color_group] == 3:
-                        self.other_players_info[p.name][pos] += 4 / 12
-                    elif self.max_per_color[card.color_group] == 4:
-                        self.other_players_info[p.name][pos] += 3 / 12
+                    self.other_players_info[p.name][pos] += new_value
                 else:
                     pos = self.pos[card.color_group]
-                    if self.max_per_color[card.color_group] == 2:
-                        self.other_players_info[p.name][pos] += 6 / 12
-                    elif self.max_per_color[card.color_group] == 3:
-                        self.other_players_info[p.name][pos] += 4 / 12
-                    elif self.max_per_color[card.color_group] == 4:
-                        self.other_players_info[p.name][pos] += 3 / 12
+                    self.other_players_info[p.name][pos] += new_value
+
 
         # Uno cada color incluye ferrocarril y utilidad, Balance dinero/dinero_total
         # color 10:  2: 6/12 12/12
@@ -75,4 +63,22 @@ class State:
 
         self.player_info[color_pos] += new_value
         self.player_info[self.pos['Balance']] -= prop.card_cost / MAX_BALANCE
+        return self.get_state()
+
+    def mortgage_property(self, prop):
+        pass
+
+    def buy_mortgage_property(self, prop):
+        pass
+
+    def pay_rent(self, prop):
+        pass
+
+    def leave_jail_paying(self):
+        pass
+
+    def leave_jail_rolling(self):
+        return self.get_state()
+
+    def end_turn(self):
         return self.get_state()

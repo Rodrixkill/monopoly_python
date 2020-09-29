@@ -40,7 +40,8 @@ class MortgageProperty(ActionOnProperty):
         print('%s mortgages property %s for %d' % (self.player.name, self.prop, self.prop.mortgage_amt))
         print('%s\'s new balance: %d' % (self.player, self.player.balance))
 
-
+    def peek_state(self, state):
+        return state.mortgage_property(self.prop)
 
 
 class BuyMortgageProperty(ActionOnProperty):
@@ -49,6 +50,9 @@ class BuyMortgageProperty(ActionOnProperty):
         self.prop.buy_mortgage(self.player)
         print('%s pays mortgage of  property %s for %d' % (self.player.name, self.prop, self.prop.mortgage_amt * 1.1))
         print('%s\'s new balance: %d' % (self.player, self.player.balance))
+
+    def peek_state(self, state):
+        return state.buy_mortgage_property(self.prop)
 
 
 class PayRent(ActionOnProperty):
@@ -59,6 +63,9 @@ class PayRent(ActionOnProperty):
               % (self.player.name, self.prop, self.prop.rent_prices[0], self.prop.owner))
         print('%s\'s new balance: %d' % (self.player, self.player.balance))
 
+    def peek_state(self, state):
+        return state.pay_rent(self.prop)
+
 
 class LeaveJailPaying(Action):
 
@@ -67,6 +74,9 @@ class LeaveJailPaying(Action):
         print('%s pays 50$ to leave jail' % self.player.name)
         print('%s\'s new balance: %d' % (self.player, self.player.balance))
 
+    def peek_state(self, state):
+        return state.leave_jail_paying()
+
 
 class LeaveJailRolling(Action):
 
@@ -74,8 +84,14 @@ class LeaveJailRolling(Action):
         self.player.release_from_jail_by_rolling()
         print('%s rolls to leave jail' % self.player.name)
 
+    def peek_state(self, state):
+        return state.leave_jail_rolling()
+
 
 class EndTurn(Action):
 
     def do(self, verbose):
         print('%s ends his turn ' % self.player.name)
+
+    def peek_state(self, state):
+        return state.end_turn()

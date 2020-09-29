@@ -4,11 +4,9 @@ Contains the Player class and associated functions.
 import random
 from typing import List
 
-from classes import card_definitions as c_def
 from classes.card_definitions import Card
 from classes.state import State
 import classes.actions as acts
-
 
 
 class Player:
@@ -42,7 +40,31 @@ class Player:
         self.game = None
 
     def reset(self):
-        pass #TODO
+        self.balance = 1500  # int
+        self.cards_owned: List[Card] = []  # list
+        self.current_pos = 0  # int (index)
+        self.in_jail = False  # bool
+        self.railroads_owned = 0  # int
+        self.utilities_owned = 0  # int
+        self.doubles_counter = 0  #int
+        self.amount_owed = 0  # int
+        self.bankruptcy = False  # bool
+        self.turns_in_jail = 0        #int
+        self.properties_by_color = {
+            "Orange": [0],
+            "Pink": [0],
+            "Light Blue":[0],
+            "Railroad":[0],
+            "Utilities":[0],
+            "Brown":[0],
+            "Red":[0],
+            "Yellow":[0],
+            "Green":[0],
+            "Blue":[0]
+        }
+        self.dice1= 0 # int
+        self.dice2= 0 # int
+        self.game = None
 
     def roll_dice(self):
         """
@@ -86,6 +108,7 @@ class Player:
 
         if card.card_cost <= self.balance:
             card.owner = self.name
+            self.cards_owned.append(card)
             self.reduce_balance(card.card_cost)
             self.properties_by_color[card.color_group][0]+=1
 
@@ -102,6 +125,7 @@ class Player:
         assert card.owner == 'Bank'
         if card.card_cost <= self.balance:
             card.owner = self.name
+            self.cards_owned.append(card)
             self.reduce_balance(money)
             self.properties_by_color[card.color_group][0]+=1
 
@@ -327,6 +351,8 @@ class Player:
         return random.random() * 2 - 1
 
     def take_action(self, actions):
+        if self.verbose:
+            print('Actions: ', [str(a) for a in actions])
         other_players = [p for p in self.game.players if p is not self]
         value_action_pairs = [(self.V(action.peek_state(State(self, other_players))), action) for action in actions]
         value_action_pairs.sort(key=lambda x: x[0], reverse=True)

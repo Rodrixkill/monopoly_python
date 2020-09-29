@@ -7,6 +7,7 @@ from game.information import initialize_cards_and_board
 from game.community_cards import initialize_community_cards
 from game.fortune_cards import initialize_fortune_cards
 import classes.actions as acts
+import random
 
 NUM_PLAYERS = 4
 TURN_LIMIT = 10000
@@ -16,8 +17,12 @@ class Game:
     def __init__(self, players: List[Player], verbose=False):
         self.players: List[Player] = players
         self.board: List[Card] = initialize_cards_and_board()
+        self.fortune_cards: List[Fortune] = initialize_fortune_cards()
+        random.shuffle(self.fortune_cards)
+        self.community_cards: List[Fortune] = initialize_community_cards()
+        random.shuffle(self.community_cards)
         self.turns = 0
-        self.player_index = -1
+        self.player_index = 0
         self.doubles_counter = 0
         self.amount_to_pay = 0
         self.actual_bid = 0
@@ -41,11 +46,18 @@ class Game:
     def play(self):
         for player in self.players:
             player.reset()
+            player.game = self
 
         while not self.game_over():
             player = self.players[self.player_index]
-
             self.play_turn(player)
+            self.turns += 1
+            self.player_index = (self.player_index + 1) % NUM_PLAYERS
+            if self.player_index == 0:
+                for player in self.players:
+                    print('%s\'s balance: %d' % (player.name, player.balance))
+            if self.verbose:
+                input()
 
         if self.verbose:
             print("%s wins!" % self.winner().name)
@@ -59,64 +71,67 @@ class Game:
                 action.describe()
             return
 
-        dice1, dice2 = player.roll_dice()
-        if self.verbose:
-            print('%d rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
-        if dice1 == dice2:
-            self.doubles_counter += 1
-        else:
-            self.doubles_counter = 0
+        turn_ended = False
+        self.doubles_counter = 0
+        while not turn_ended:
 
-        if self.doubles_counter == 3:
-            self.doubles_counter = 0
-            self.player_index = (self.player_index + 1) % 4
-            player.send_to_jail()
+            dice1, dice2 = player.roll_dice()
             if self.verbose:
-                print('%s was sent to jail for rolling doubles three times in a row' % player.name)
-            return
+                print('%s rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
+            if dice1 == dice2:
+                self.doubles_counter += 1
+            else:
+                self.doubles_counter = 0
+                turn_ended = True
 
-        last_pos = player.current_pos
-        player.move_player(dice1 + dice2)
+            if self.doubles_counter == 3:
+                player.send_to_jail()
+                if self.verbose:
+                    print('%s was sent to jail for rolling doubles three times in a row' % player.name)
+                return
 
-        if player.current_pos < last_pos:
-            player.add_balance(200)
+            last_pos = player.current_pos
+            player.move_player(dice1 + dice2)
+
+            if player.current_pos < last_pos:
+                player.add_balance(200)
+                if self.verbose:
+                    print('%s receives 200$ for passing GO' % player.name)
+
+            prop_landed = self.board[player.current_pos]
             if self.verbose:
-                print('%s receives 200$ for passing GO' % player.name)
+                print('%s landed on %s' % (player.name, prop_landed))
 
-        prop_landed = self.board[player.current_pos]
-        if self.verbose:
-            print('%s landed on %s' % (player.name, prop_landed))
+            actions: List[acts.Action] = [acts.BuyMortgageProperty(player, prop)
+                                          if prop.mortgaged else acts.MortgageProperty(player, prop)
+                                          for prop in player.cards_owned]
 
-        actions: List[acts.Action] = [acts.BuyMortgageProperty(player, prop)
-                                      if prop.mortgaged else acts.MortgageProperty(player, prop)
-                                      for prop in player.cards_owned]
+            if prop_landed.owner_is_bank():
+                card_name = prop_landed.card_name
+                if card_name == 'Luxury Tax' or card_name == 'Income Tax':
+                    tax = 100 if card_name == 'Luxury Tax' else 200
+                    player.reduce_balance(tax)
+                    print('%s pays tax of %s$' % (player.name, tax))
+                elif card_name == 'Community Chest' or card_name == 'Chance':
+                    cards = self.fortune_cards if card_name == 'Chance' else self.community_cards
+                    card: Fortune = random.choice(cards)
+                    if self.verbose:
+                        print('%s draws card: %s' % (player.name, card.description))
+                    card.play(player, [p for p in self.players if p is not player])
+                elif card_name == 'Go to Jail':
+                    print('%s goes to jail' % player.name)
+                elif card_name != 'Go' and card_name != 'Jail/Visiting Jail' and card_name != 'Free Parking':
+                    actions.append(acts.BuyProperty(player, prop_landed))
+            else:
+                actions.append(acts.PayRent(player, prop_landed))
 
-        tax = 0
-        if prop_landed.card_name == 'Luxury Tax':
-            tax = 100
-        elif prop_landed.card_name == 'Income Tax':
-            tax = 200
-
-        while player.balance < tax:
-            action = player.take_action(actions)
-            actions.remove(action)
-            action.do(self.verbose)
-
-        #community
-
-
-        player.reduce_balance(tax)
-        if self.verbose:
-            print('%s pays tax of %s$' % (player.name, tax))
-
-        if not prop_landed.has_owner():
-            actions.append(acts.BuyProperty(player, prop_landed))
-        else:
-            actions.append(acts.PayRent(player, prop_landed))
-
-            # while player.balance <= debe:
-
-
+            end_turn_action = acts.EndTurn(player)
+            action = None
+            actions.append(end_turn_action)
+            while action is not end_turn_action:
+                action = player.take_action(actions)
+                actions.remove(action)
+                action.do(self.verbose)
 
     def start_auction(self, prop: Card):
         m = 0

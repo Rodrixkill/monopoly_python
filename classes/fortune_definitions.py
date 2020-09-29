@@ -1,7 +1,7 @@
 class Fortune:
-    def __init__(self, card_name, type, movement, pay, receive, destination, money):
+    def __init__(self, card_name, description, movement, pay, receive, destination, money):
         self.card_name = card_name      # str
-        self.type = type                # str
+        self.description = description                # str
         self.movement = movement        # bool
         self.pay = pay                  # bool
         self.receive = receive          # bool
@@ -29,7 +29,7 @@ class Fortune:
                 p.add_balance(50)
         elif self.card_name == "It's your bithday":
             for p in otherplayers:
-                p.reduce_balance(10,player)
+                p.reduce_balance(10, player)
             player.add_balance(10*len(otherplayers))
         elif self.card_name == 'Make repairs':
             for card in player.cards_owned:
@@ -48,12 +48,12 @@ class Fortune:
         elif self.card_name == 'Go Back':
             player.move_player(-3)
         elif self.card_name == 'Advance to nearest railroad' or self.card_name == "Advance to nearest utility":
-            val= self.nGE(player.current_pos,self.destination)
+            val = self.nGE(player.current_pos, self.destination)
             if player.current_pos >= val:
                 player.add_balance(200)
             player.move_player_card(val)
 
-    def nGE(val,arr):
+    def nGE(self, val, arr):
         next = min(arr)
         for i in range(len(arr)):
             if arr[i] > val:

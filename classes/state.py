@@ -1,4 +1,3 @@
-from classes.game import Game
 from classes.card_definitions import Card
 
 MAX_BALANCE = 2000

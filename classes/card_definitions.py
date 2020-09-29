@@ -39,8 +39,8 @@ class Card:
         player.add_balance(self.card_cost)
         self.owner = 'Bank'
 
-    def has_owner(self, player):
-        return self.owner is not 'Bank'
+    def owner_is_bank(self):
+        return self.owner is 'Bank'
 
     def sell_player(self, player, player2, cost):
         """

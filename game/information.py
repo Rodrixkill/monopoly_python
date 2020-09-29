@@ -42,7 +42,7 @@ def initialize_cards_and_board():
                                                                             3: 270,
                                                                             4: 400,
                                                                             5: 550}, 50, "Bank", False)
-    chance = c_def.Card("Community Chest", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "Bank", False)
+    chance = c_def.Card("Chance", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "Bank", False)
     vermont_ave = c_def.Card("Vermont Avenue", "Light Blue", 100, 50, 0, {0: 6,
                                                                           1: 30,
                                                                           2: 90,

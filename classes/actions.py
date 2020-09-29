@@ -41,6 +41,8 @@ class MortgageProperty(ActionOnProperty):
         print('%s\'s new balance: %d' % (self.player, self.player.balance))
 
 
+
+
 class BuyMortgageProperty(ActionOnProperty):
 
     def do(self, verbose):

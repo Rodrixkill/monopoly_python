@@ -171,13 +171,14 @@ class Player:
                     rent_amt *= 2
                 elif card.color_group == "Blue" and card.owner.properties_by_color["Blue"][0] == 2:
                     rent_amt *= 2
-        self.reduce_balance(rent_amt)
+        self.reduce_balance(rent_amt,card.owner)
         card.owner.add_balance(rent_amt)
 
-    def reduce_balance(self, amount):  # TODO
+    def reduce_balance(self, amount, player=0):
         """
         Reduces the player's balance.
         :param amount: int, the amount of money to reduce the player's balance by.
+        player is different from 0 if the debt is with another player
         :return: None.
         """
         if self.balance < amount:
@@ -186,20 +187,12 @@ class Player:
                 action = self.take_action(actions)
                 actions.remove(action)
                 action.do(self.verbose)
-            """
-            print("Your balance is insufficient for this action.")
-            bankrupt = self.check_if_bankrupt(amount)
-            if not bankrupt:
-                print("You need to sell or mortgage certain properties.")
-                user_action = input("Do you want to sell or mortgage? (s/m)")
-                if user_action == 's':
-                    pass  # sell()  TODO: implement this function.
+
+            if self.balance < amount:
+                if player == 0:
+                    self.bankrupt_player_to_bank()
                 else:
-                    pass  # mortgage()  TODO: implement this function.
-            """
-            #TODO DECLARAR BANCAROTA
-            # if balance <
-            #     bancarota
+                    self.bankrupt_player_to_player(player)
         else:
             self.balance -= amount
 

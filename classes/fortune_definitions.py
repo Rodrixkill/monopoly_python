@@ -29,7 +29,7 @@ class Fortune:
                 p.add_balance(50)
         elif self.card_name == "It's your bithday":
             for p in otherplayers:
-                p.reduce_balance(10)
+                p.reduce_balance(10,player)
             player.add_balance(10*len(otherplayers))
         elif self.card_name == 'Make repairs':
             for card in player.cards_owned:

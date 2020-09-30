@@ -84,8 +84,11 @@ class Player:
         :param dice_amt: int, the number rolled by the two die.
         :return: an int that represents the updated position of the player on the board.
         """
+        old_pos=self.current_pos
         self.current_pos += dice_amt
         self.current_pos = self.current_pos % 40
+        if old_pos >= self.current_pos:
+            self.add_balance(200)
         return self.current_pos
 
     def move_player_card(self, destination):
@@ -94,6 +97,8 @@ class Player:
         :param dice_amt: int, the number rolled by the two die.
         :return: an int that represents the updated position of the player on the board.
         """
+        if destination < self.current_pos:
+            self.add_balance(200)
         self.current_pos = destination
         return self.current_pos
 

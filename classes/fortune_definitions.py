@@ -10,8 +10,6 @@ class Fortune:
 
     def play(self, player, otherplayers):
         if self.movement:
-            if player.current_pos >= self.destination:
-                player.add_balance(200)
             player.move_player_card(self.destination)
         if self.receive:
             player.add_balance(self.money)
@@ -49,8 +47,6 @@ class Fortune:
             player.move_player(-3)
         elif self.card_name == 'Advance to nearest railroad' or self.card_name == "Advance to nearest utility":
             val = self.nGE(player.current_pos, self.destination)
-            if player.current_pos >= val:
-                player.add_balance(200)
             player.move_player_card(val)
 
     def nGE(self, val, arr):

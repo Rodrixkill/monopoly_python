@@ -40,7 +40,7 @@ class Card:
         self.owner = 'Bank'
 
     def owner_is_bank(self):
-        return self.owner is 'Bank'
+        return self.owner == 'Bank'
 
     def sell_player(self, player, player2, cost):
         """

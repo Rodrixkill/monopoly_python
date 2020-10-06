@@ -67,7 +67,7 @@ class PayRent(ActionOnProperty):
     def do(self, verbose):
         self.player.charge_rent(self.prop)
         print('%s pays rent of property %s of %d, owned by %s'
-              % (self.player.name, self.prop, self.prop.rent_prices[0], self.prop.owner))
+              % (self.player.name, self.prop, self.prop.rent_prices[0], self.prop.owner.name))
         print('%s\'s new balance: %d' % (self.player.name, self.player.balance))
 
     def peek_state(self, state):

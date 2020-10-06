@@ -112,7 +112,7 @@ class Player:
         assert card.card_cost <= self.balance
 
         if card.card_cost <= self.balance:
-            card.owner = self.name
+            card.owner = self
             self.cards_owned.append(card)
             self.reduce_balance(card.card_cost)
             self.properties_by_color[card.color_group][0]+=1
@@ -129,7 +129,7 @@ class Player:
         """
         assert card.owner == 'Bank'
         if card.card_cost <= self.balance:
-            card.owner = self.name
+            card.owner = self
             self.cards_owned.append(card)
             self.reduce_balance(money)
             self.properties_by_color[card.color_group][0]+=1

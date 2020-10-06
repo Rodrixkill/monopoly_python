@@ -56,8 +56,8 @@ class Game:
             if self.player_index == 0:
                 for player in self.players:
                     print('%s\'s balance: %d' % (player.name, player.balance))
-            if self.verbose:
-                input()
+            # if self.verbose:
+            #     input()
 
         if self.verbose:
             print("%s wins!" % self.winner().name)
@@ -66,7 +66,7 @@ class Game:
         if player.in_jail:
             actions = [acts.LeaveJailPaying(player), acts.LeaveJailRolling(player)]
             action = player.take_action(actions)
-            action.do()
+            action.do(self.verbose)
             if self.verbose:
                 action.describe()
             return
@@ -122,7 +122,7 @@ class Game:
                     print('%s goes to jail' % player.name)
                 elif card_name != 'Go' and card_name != 'Jail/Visiting Jail' and card_name != 'Free Parking':
                     actions.append(acts.BuyProperty(player, prop_landed))
-            else:
+            elif prop_landed.owner is not player:
                 actions.append(acts.PayRent(player, prop_landed))
 
             end_turn_action = acts.EndTurn(player)

@@ -167,7 +167,7 @@ def initialize_cards_and_board():
                                                                 4: 1300,
                                                                 5: 1500}, 175, "Bank", False)
     luxury_tax = c_def.Card("Luxury Tax", "N/A", "N/A", "N/A", "N/A", "N/A", 0, "Bank", False)
-    boardwalk = c_def.Card("Boardwalk", "N/A", 400, 200, 0, {0: 50,
+    boardwalk = c_def.Card("Boardwalk", "Blue", 400, 200, 0, {0: 50,
                                                              1: 200,
                                                              2: 600,
                                                              3: 1400,

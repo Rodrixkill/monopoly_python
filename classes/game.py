@@ -62,33 +62,39 @@ class Game:
         if self.verbose:
             print("%s wins!" % self.winner().name)
 
+    def play_turn_in_jail(self, player):
+        pass
+
     def play_turn(self, player):
-        if player.in_jail:
-            actions = [acts.LeaveJailPaying(player), acts.LeaveJailRolling(player)]
-            action = player.take_action(actions)
-            action.do(self.verbose)
-            if self.verbose:
-                action.describe()
+        if player.bankruptcy:
             return
+
+        dice1, dice2 = player.roll_dice()
+        if self.verbose:
+            print('%s rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
+        if dice1 == dice2:
+            self.doubles_counter += 1
+        else:
+            self.doubles_counter = 0
+
+        if self.doubles_counter == 3:
+            player.send_to_jail()
+            if self.verbose:
+                print('%s was sent to jail for rolling doubles three times in a row' % player.name)
+            return
+
+        player.move_player(dice1 + dice2)
+        prop_landed = self.board[player.current_pos]
+        if self.verbose:
+            print('%s landed on %s' % (player.name, prop_landed))
+
+
+
+
 
         turn_ended = False
         self.doubles_counter = 0
         while not turn_ended:
-
-            dice1, dice2 = player.roll_dice()
-            if self.verbose:
-                print('%s rolls %d and %d. Total: %d' % (player.name, dice1, dice2, dice1 + dice2))
-            if dice1 == dice2:
-                self.doubles_counter += 1
-            else:
-                self.doubles_counter = 0
-                turn_ended = True
-
-            if self.doubles_counter == 3:
-                player.send_to_jail()
-                if self.verbose:
-                    print('%s was sent to jail for rolling doubles three times in a row' % player.name)
-                return
 
             last_pos = player.current_pos
             player.move_player(dice1 + dice2)

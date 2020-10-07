@@ -219,20 +219,3 @@ def initialize_cards_and_board():
 
     return board
 
-
-def display_instructions() -> None:
-    """
-    Displays possible options for players.
-    :return: None
-    """
-    print("Instruction.......................................Command")
-    print("Roll dice...........................................r")
-    print("View balance........................................b")
-    print("View cards and houses owned.........................c")
-    print("Sell property.......................................s")
-    print("Mortgage property...................................m")
-    print("Construct house.....................................h")
-    print("Trade with AI.......................................t")
-    print("Trade with another player...........................p")
-    print("View the AI's stats.................................v")
-

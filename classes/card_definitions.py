@@ -86,13 +86,3 @@ class Card:
     def __str__(self):
         return '%s(%s)' % (self.card_name, self.color_group)
 
-
-
-def locate_card_object(name, board):
-
-    for card in board:
-        if card.card_name == name:
-            card_object = card
-            break
-
-    return card_object

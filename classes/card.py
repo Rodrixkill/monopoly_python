@@ -48,6 +48,9 @@ class PropertyCard(Card):
             return self.rent_prices[0] * 2
         return self.rent_prices[self.houses]
 
+    def has_owner(self):
+        return self.owner is not None
+
 
 class RailRoadCard(PropertyCard):
     def __init__(self, name):

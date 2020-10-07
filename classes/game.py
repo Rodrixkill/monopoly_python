@@ -6,11 +6,13 @@ from classes.fortune_definitions import Fortune
 from game.information import initialize_cards_and_board
 from game.community_cards import initialize_community_cards
 from game.fortune_cards import initialize_fortune_cards
-import classes.actions as acts
+import classes.monopoly_actions as acts
 import random
 
 NUM_PLAYERS = 4
 TURN_LIMIT = 10000
+MAX_HOUSES = 25
+MAX_HOTELS = 10
 
 
 class Game:
@@ -27,6 +29,8 @@ class Game:
         self.amount_to_pay = 0
         self.actual_bid = 0
         self.verbose = verbose
+        self.houses = MAX_HOUSES
+        self.hotels = MAX_HOTELS
 
     def players_not_in_bankruptcy(self):
         return [player for player in self.players if not player.bankruptcy]

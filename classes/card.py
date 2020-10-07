@@ -1,22 +1,28 @@
 class Group:
-    def __init__(self, color, properties, house_cost, is_color=True):
+    def __init__(self, color, properties, building_cost, is_color=True):
         self.color = color
         self.properties = properties
-        self.house_cost = house_cost
+        self.building_cost = building_cost
         self.is_color = is_color
         for prop in self.properties:
             prop.group = self
 
     def owner(self):
         owner = self.properties[0].owner
-        if all([card.owner is owner for card in self.properties]):
+        mortgaged = any([card.mortgage for card in self.properties])
+        same_owner = all([card.owner is owner for card in self.properties])
+        if not mortgaged and same_owner:
             return owner
+        return None
 
     def num_props(self):
         return len(self.properties)
 
     def num_owned(self, owner):
         return len([prop for prop in self.properties if prop.owner is owner])
+
+    def has_buildings(self):
+        return any([prop.houses > 0 for prop in self.properties])
 
 
 class Card:
@@ -39,14 +45,17 @@ class PropertyCard(Card):
         self.cost = cost
         self.rent_prices = rent_prices
         self.mortgage_cost = mortgage_cost
-        self.houses = 0
+        self.buildings = 0
         self.owner = None
-        self.mortgage = False
+        self.mortgaged = False
+
+    def desc(self):
+        return "%s(%s)" % (self.name, self.group.color)
 
     def calc_rent(self, dices=None):
-        if self.houses == 0 and self.group.owner() is self.owner:
+        if self.buildings == 0 and self.group.owner() is self.owner:
             return self.rent_prices[0] * 2
-        return self.rent_prices[self.houses]
+        return self.rent_prices[self.buildings]
 
     def has_owner(self):
         return self.owner is not None

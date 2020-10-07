@@ -6,7 +6,7 @@ from typing import List
 
 from classes.card_definitions import Card
 from classes.state import State
-import classes.actions as acts
+import classes.monopoly_actions as acts
 
 
 class Player:
@@ -38,6 +38,7 @@ class Player:
         self.dice2= 0 # int
         self.verbose = verbose
         self.game = None
+        self.properties = []
 
     def reset(self):
         self.balance = 1500  # int

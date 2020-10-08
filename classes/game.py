@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Any, Union
 
-from classes.player_definitions import Player
-from classes.card_definitions import Card
+from classes.player import Player
+from classes.card import Card
 from classes.fortune_definitions import Fortune
-from game.information import initialize_cards_and_board
+from game.board_init import initialize_board
 from game.community_cards import initialize_community_cards
 from game.fortune_cards import initialize_fortune_cards
 import classes.monopoly_actions as acts
@@ -15,42 +15,52 @@ MAX_HOUSES = 25
 MAX_HOTELS = 10
 
 
+def smooth_function(x: float):
+    return x / (1 + abs(x))
+
+
 class Game:
     def __init__(self, players: List[Player], verbose=False):
         self.players: List[Player] = players
-        self.board: List[Card] = initialize_cards_and_board()
+        self.board: List[Card] = initialize_board()
         self.fortune_cards: List[Fortune] = initialize_fortune_cards()
-        random.shuffle(self.fortune_cards)
         self.community_cards: List[Fortune] = initialize_community_cards()
-        random.shuffle(self.community_cards)
         self.turns = 0
         self.player_index = 0
         self.doubles_counter = 0
-        self.amount_to_pay = 0
-        self.actual_bid = 0
         self.verbose = verbose
         self.houses = MAX_HOUSES
         self.hotels = MAX_HOTELS
 
-    def players_not_in_bankruptcy(self):
-        return [player for player in self.players if not player.bankruptcy]
+    def players_not_in_bankrupt(self):
+        return [player for player in self.players if not player.bankrupt]
 
     def game_over(self):
-        return self.turns >= TURN_LIMIT or len(self.players_not_in_bankruptcy()) == 1
+        return self.turns >= TURN_LIMIT or len(self.players_not_in_bankrupt()) == 1
 
-    def winner(self) -> Player:
+    def winner(self):
         assert (self.game_over())
-        players_not_in_bankruptcy = self.players_not_in_bankruptcy()
-        if len(players_not_in_bankruptcy) == 1:
-            return players_not_in_bankruptcy[0]
+        players = self.players_not_in_bankrupt()
+        if len(players) == 1:
+            return players[0]
         else:
             richest_players = sorted(self.players, key=lambda x: x.total_net_worth(), reverse=True)
             return richest_players[0]
 
+    def calc_reward(self, player):
+        p = len(self.players_not_in_bankrupt())
+        c = 0.2
+        m = player.money / sum([p.money for p in self.players])
+
+        props = [card for card in self.board if card.is_property and card.has_owner()]
+        v = [(prop.houses+1) * (1 if prop.owner is player else -1) for prop in props]
+
+        return smooth_function((v*c)/p) + (1/p)*m
+
+
     def play(self):
         for player in self.players:
             player.reset()
-            player.game = self
 
         while not self.game_over():
             player = self.players[self.player_index]

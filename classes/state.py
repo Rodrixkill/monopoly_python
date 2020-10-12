@@ -1,7 +1,6 @@
 from classes.card_definitions import Card
 from game.information import initialize_cards_and_board
 
-MAX_BALANCE = 2000
 MAX_POSITION = 40
 
 
@@ -43,7 +42,7 @@ class State:
         if self.player_finance == 0:
             self.finance_vector_2 = 0
         else:
-            self.finance_vector_2 = self.player_finance / (self.player_finance + self.other_players_finance)
+            self.finance_vector_2 = (self.player_finance/1500) / (abs(self.player_finance/1500) + 1)
 
         if self.player_properties == 0:
             self.finance_vector_1 = 0

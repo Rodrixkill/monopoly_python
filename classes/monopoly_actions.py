@@ -1,3 +1,6 @@
+import random
+
+
 class Actions:
 
     def __init__(self, verbose=False):
@@ -9,8 +12,8 @@ class Actions:
             player.money -= prop.cost
             player.properties.append(prop)
             if self.verbose:
-                print("%s buys property %s for %d$" % (player.name, prop.desc(), prop.cost))
-                print("%s's new balance: %d$" % (player.name, player.money))
+                print("%s buys property %s for $%d" % (player.name, prop.desc(), prop.cost))
+                print("%s's new balance: $%d" % (player.name, player.money))
             return True
         return False
 
@@ -19,8 +22,8 @@ class Actions:
             prop.mortgaged = False
             player.money -= prop.mortgage_cost * 1.1
             if self.verbose:
-                print("%s unmortgages property %s for %d$" % (player.name, prop.desc(), prop.mortgage_cost * 1.1))
-                print("%s's new balance: %d$" % (player.name, player.money))
+                print("%s unmortgages property %s for $%d" % (player.name, prop.desc(), prop.mortgage_cost * 1.1))
+                print("%s's new balance: $%d" % (player.name, player.money))
             return True
         return False
 
@@ -33,8 +36,8 @@ class Actions:
                 prop_to_build.buildings += 1
                 player.money -= group.building_cost
                 if self.verbose:
-                    print("%s builds a house on %s for %d$" % (player.name, prop_to_build.desc(), group.building_cost))
-                    print("%s's new balance: %d$" % (player.name, player.money))
+                    print("%s builds a house on %s for $%d" % (player.name, prop_to_build.desc(), group.building_cost))
+                    print("%s's new balance: $%d" % (player.name, player.money))
                 return True
             elif prop_to_build.buildings == 4 and game.hotels > 0:
                 game.hotels -= 1
@@ -42,8 +45,8 @@ class Actions:
                 prop_to_build.buildings += 1
                 player.money -= group.building_cost
                 if self.verbose:
-                    print("%s builds a hotel on %s for %d$" % (player.name, prop_to_build.desc(), group.building_cost))
-                    print("%s's new balance: %d$" % (player.name, player.money))
+                    print("%s builds a hotel on %s for $%d" % (player.name, prop_to_build.desc(), group.building_cost))
+                    print("%s's new balance: $%d" % (player.name, player.money))
                 return True
         return False
 
@@ -52,8 +55,8 @@ class Actions:
             prop.mortgaged = True
             player.money += prop.mortgage_cost
             if self.verbose:
-                print("%s mortgages %s for %d$" % (player.name, prop.desc(), prop.mortgage_cost))
-                print("%s's new balance: %d$" % (player.name, player.money))
+                print("%s mortgages %s for $%d" % (player.name, prop.desc(), prop.mortgage_cost))
+                print("%s's new balance: $%d" % (player.name, player.money))
             return True
         return False
 
@@ -66,8 +69,8 @@ class Actions:
                 prop_to_sell.buildings -= 1
                 player.money += 0.5 * group.building_cost
                 if self.verbose:
-                    print("%s sells house of %s for %d$" % (player.name, prop_to_sell.desc(), group.building_cost * 0.5))
-                    print("%s's new balance: %d$" % (player.name, player.money))
+                    print("%s sells house of %s for $%d" % (player.name, prop_to_sell.desc(), group.building_cost * 0.5))
+                    print("%s's new balance: $%d" % (player.name, player.money))
                 return True
             elif prop_to_sell.buildings == 5 and game.houses >= 4:
                 game.hotels += 1
@@ -75,8 +78,8 @@ class Actions:
                 prop_to_sell.buildings -= 1
                 player.money += 0.5 * group.building_cost
                 if self.verbose:
-                    print("%s sells hotel of %s for %d$" % (player.name, prop_to_sell.desc(), group.building_cost * 0.5))
-                    print("%s's new balance: %d$" % (player.name, player.money))
+                    print("%s sells hotel of %s for $%d" % (player.name, prop_to_sell.desc(), group.building_cost * 0.5))
+                    print("%s's new balance: $%d" % (player.name, player.money))
                 return True
         return False
 
@@ -86,17 +89,18 @@ class Actions:
             while player.money < amount and can_sell:
                 can_sell = self.sell_property(player, game)
             if player.money < amount:
+                self.bankrupt(player, target)
                 return False
 
         player.money -= amount
         if self.verbose:
             target_name = "The Bank" if target is None else target.name
-            print("%s pays %d$ to %s" % (player.name, amount, target_name))
-            print("%s's new balance: %d$" % (player.name, player.money))
+            print("%s pays $%d to %s" % (player.name, amount, target_name))
+            print("%s's new balance: $%d" % (player.name, player.money))
         if target is not None:
             target.money += amount
             if self.verbose:
-                print("%s's new balance: %d$" % (target.name, target.money))
+                print("%s's new balance: $%d" % (target.name, target.money))
         return True
 
     def sell_property(self, player, game):
@@ -111,6 +115,87 @@ class Actions:
                     done = True
                     break
         return done
+
+    def bankrupt(self, player, target=None):
+        player.bankrupt = True
+        if self.verbose:
+            print("%s goes bankrupt" % player.name)
+        if target is not None:
+            target.properties += player.properties
+            target.money += player.money
+        else:
+            for prop in player.properties:
+                self.auction(prop)
+
+    def send_to_jail(self, player):
+        player.current_pos = 10
+        player.in_jail = True
+        if self.verbose:
+            print("%s was sent to jail" % player.name)
+
+    def roll_dices(self):
+        random.seed()
+        dice1 = random.randint(1, 6)
+        dice2 = random.randint(1, 6)
+        if self.verbose:
+            print("Dices rolled: %d + %d = %d" % (dice1, dice2, dice1+dice2))
+        return dice1, dice2
+
+    def move_player(self, player, dices=None, position=None):
+        last_pos = player.current_pos
+        if dices is not None:
+            player.current_pos += dices
+            player.current_pos %= 40
+        elif position is not None:
+            player.current_pos = position
+
+        if last_pos > player.current_pos and self.verbose:
+            print("%s collects %d for passing GO" % (player.name, 200))
+
+    def auction(self, prop):
+        pass
+
+    def draw_from_deck(self, player, deck):
+        card = deck.pop(0)
+        deck.append(card)
+        if self.verbose:
+            print("%s draws card: %s", player.name, card.name)
+        return card
+
+    def check_pos(self, player, game):
+        card_landed = game.board[player.current_pos]
+        if self.verbose:
+            print("%s has landed on %s", player.name, card_landed.desc())
+
+        if card_landed.is_property and card_landed.has_owner() and card_landed.owner is not player:
+            rent = card_landed.calc_rent()
+            game.acts.pay_money(rent, player, card_landed.owner, self)
+        elif card_landed.is_tax:
+            game.acts.pay_money(card_landed.tax, player, None, self)
+        elif card_landed.is_go_jail:
+            game.acts.send_to_jail(player)
+        elif card_landed.is_community:
+            card = self.draw_from_deck(player, game.community_cards)
+            card.apply(game)
+        elif card_landed.is_chance:
+            card = self.draw_from_deck(player, game.chance_cards)
+            card.apply(game)
+            
+    def try_to_escape_jail(self, player, dice1, dice2):
+        if dice1 == dice2:
+            player.in_jail = False
+            player.turns_in_jail = 0
+            if self.verbose:
+                print("%s rolled doubles and has been released from jail" % player.name)
+        else:
+            player.turns_in_jail += 1
+            if player.turns_in_jail == 3:
+                if self.verbose:
+                    print("%s didn't rolled doubles in three turns" % player.name)
+                self.pay_money(amount=50, player=player, target=None, game=self)
+
+
+
 
 
 

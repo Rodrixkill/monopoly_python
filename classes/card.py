@@ -37,6 +37,9 @@ class Card:
         self.is_special = is_special
         self.is_tax = is_tax
 
+    def desc(self):
+        return self.name
+
 
 class PropertyCard(Card):
     def __init__(self, name, cost, rent_prices, mortgage_cost):

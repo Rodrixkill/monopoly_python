@@ -1,74 +1,40 @@
-from classes.card_definitions import Card
-from game.information import initialize_cards_and_board
-
+MAX_MONEY = 1500
 MAX_POSITION = 40
 
 
 class State:
-    def __init__(self, player, other_players):
-        self.board = initialize_cards_and_board()
-        self.player_info = [0] * 10
-        self.other_players_info = [0] * 10
-        self.pos = {
-            "Brown": 0, "Light Blue": 1, "Pink": 2, "Orange": 3, "Red": 4, "Yellow": 5, "Green": 6, "Blue": 7,
-            "Railroad": 8, "Utilities": 9 , "N/A": 10
-        }
-        # pARA HIPOTECA SUMAS COLOR MAS 10, SERIA DEL 10 AL 19
-        self.max_per_color = {
-            "Brown": 2, "Light Blue": 3, "Pink": 3, "Orange": 3, "Red": 3, "Yellow": 3, "Green": 3, "Blue": 2,
-            "Railroad": 4, "Utilities": 2
-        }
+    def __init__(self, player, game):
+        self.game = game
+        self.player_info = [0] * len(game.groups)
+        self.others_info = [0] * len(game.groups)
 
-        self.player_properties = len(player.cards_owned)
-        self.player_finance = player.balance
-        self.other_players_finance = 0
-        self.other_player_properties = 0
+        for i in range(len(game.groups)):
+            group = game.groups[i]
+            if group.owner() is None:
+                group_props = [prop for prop in group.properties if prop.has_owner() and not prop.mortgaged]
+                player_props = len([prop for prop in group_props if prop.owner is player])
+                others_props = len(group_props) - player_props
+                x = 12 / group.num_props()
+                self.player_info[i] = x * player_props / 17
+                self.others_info[i] = x * others_props / 17
+            else:
+                owner = group.owner()
+                max_buildings = max([prop.buildings for prop in group.properties])
+                if owner is player:
+                    self.player_info[i] = (12 + max_buildings) / 17
+                else:
+                    self.others_info[i] = (12 + max_buildings) / 17
 
-        for card in player.cards_owned:
-            new_value = self.max_per_color[card.color_group] / 17
-            new_value += card.houses_built / 17
-            pos = self.pos[card.color_group]
-            self.player_info[pos] += new_value
+        player_props = 0
+        total_props = 0.001
+        for card in game.board:
+            if card.is_property and card.has_owner():
+                if card.owner is player:
+                    player_props += 1
+                total_props += 1
 
-        for p in other_players:
-            self.other_players_finance += p.balance
-            self.other_player_properties += len(p.cards_owned)
-            for card in p.cards_owned:
-                new_value = self.max_per_color[card.color_group] / 17
-                new_value += card.houses_built / 17
-                pos = self.pos[card.color_group]
-                self.other_players_info[p.name][pos] += new_value
+        self.finance = [player_props / total_props, game.smooth_function(player.money / MAX_MONEY)]
 
-        if self.player_finance == 0:
-            self.finance_vector_2 = 0
-        else:
-            self.finance_vector_2 = (self.player_finance/1500) / (abs(self.player_finance/1500) + 1)
-
-        if self.player_properties == 0:
-            self.finance_vector_1 = 0
-        else:
-            self.finance_vector_1 = self.player_properties / (self.player_properties + self.other_player_properties)
-
-        self.position = self.pos[self.board[player.current_pos].color_group]/10
-        # Uno cada color incluye ferrocarril y utilidad, Balance dinero/dinero_total
-        # color 10:  2: 6/12 12/12
-        #           3: 4/12 8/12/ 12/12
-        # hip color 10:
-        # balance/MAX_BALANCE
-        # posicion/40
-
-        # 4 columnas 1 para cada jugador
-        # 23x4
-
-    def get_state(self):
-        flattened = self.player_info
-        for key in self.other_players_info:
-            flattened += self.other_players_info[key]
-        return flattened
-
-    def get_finance(self):
-        return self.finance_vector_1,self.finance_vector_2
-
-    def get_position(self):
-        return self.position
-
+    def get_state(self, group):
+        pos = (1 + self.game.groups.index(group)) / len(self.game.groups)
+        return self.player_info + self.others_info + [pos] + self.finance

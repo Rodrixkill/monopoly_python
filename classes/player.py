@@ -1,3 +1,6 @@
+import random
+from classes.rl_actions import SPEND, GET_MONEY, DO_NOTHING
+
 class Player:
     def __init__(self, name):
         self.name = name
@@ -7,6 +10,8 @@ class Player:
         self.in_jail = False
         self.turns_in_jail = 0
         self.bankrupt = False
+        self.last_state = None
+        self.last_action = None
 
     def reset(self):
         self.properties = []
@@ -19,6 +24,34 @@ class Player:
     def total_net_worth(self):
         net_worth = self.money
         for prop in self.properties:
+            if prop.mortgaged:
+                continue
             net_worth += prop.mortgage_cost
             net_worth += prop.buildings*prop.group.building_cost*0.5
         return net_worth
+
+    def policy(self, state):
+        pass
+
+    def receive_reward(self, reward):
+        pass
+
+
+class RandomAgent(Player):
+    def policy(self, state):
+        return random.choice([DO_NOTHING, SPEND, GET_MONEY])
+
+
+class FixedPolicyAgent(Player):
+    def __init__(self, name, min_spend, max_get_money):
+        Player.__init__(self, name)
+        self.min_spend = min_spend
+        self.max_get_money = max_get_money
+
+    def policy(self, state):
+        if self.money <= self.max_get_money:
+            return GET_MONEY
+        elif self.money >= self.min_spend:
+            return SPEND
+        else:
+            return DO_NOTHING

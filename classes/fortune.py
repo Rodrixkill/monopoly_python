@@ -21,7 +21,7 @@ class Pay(Fortune):
     def apply(self, game):
         player = game.players[game.player_index]
         if self.to_everyone:
-            other_players = [p for p in game.players if p is not player]
+            other_players = [p for p in game.players_not_in_bankrupt() if p is not player]
             for other_player in other_players:
                 game.acts.pay_money(amount=self.money, player=player, target=other_player, game=game)
         else:
@@ -37,7 +37,7 @@ class Collect(Fortune):
     def apply(self, game):
         player = game.players[game.player_index]
         if self.from_everyone:
-            other_players = [p for p in game.players if p is not player]
+            other_players = [p for p in game.players_not_in_bankrupt() if p is not player]
             for other_player in other_players:
                 game.acts.pay_money(amount=self.money, player=other_player, target=player, game=game)
         else:
@@ -54,7 +54,7 @@ class PayForBuildings(Fortune):
 
     def apply(self, game):
         player = game.players[game.player_index]
-        buildings_own = [prop.houses for prop in player.properties]
+        buildings_own = [prop.buildings for prop in player.properties]
         hotels_own = buildings_own.count(5)
         houses_own = sum(buildings_own) - 5 * hotels_own
         amount = houses_own * self.money_per_house + hotels_own * self.money_per_hotel
@@ -110,7 +110,7 @@ class GoToNearestUtility(GoToNearest):
         utility = game.board[dest]
         if utility.has_owner() and utility.owner is not player:
             dice1, dice2 = game.acts.roll_dices()
-            game.acts.pay_money(self.mult*(dice1+dice2), player, utility.owner, self)
+            game.acts.pay_money(self.mult*(dice1+dice2), player, utility.owner, game)
 
 
 class GoToNearestRailroad(GoToNearest):
@@ -121,4 +121,4 @@ class GoToNearestRailroad(GoToNearest):
         game.acts.move_player(player, position=dest)
         railroad = game.board[dest]
         if railroad.has_owner() and railroad.owner is not player:
-            game.acts.pay_money(self.mult*(railroad.calc_rent()), player, railroad.owner, self)
+            game.acts.pay_money(self.mult*(railroad.calc_rent()), player, railroad.owner, game)

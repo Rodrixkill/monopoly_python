@@ -29,7 +29,7 @@ class Actions:
 
     def build_on_area(self, player, group, game):
         if group.is_color and group.owner() is player and player.money > group.building_cost:
-            props = sorted(group.properties, key=lambda x: x.houses)
+            props = sorted(reversed(group.properties), key=lambda x: x.buildings)
             prop_to_build = props[0]
             if prop_to_build.buildings < 4 and game.houses > 0:
                 game.houses -= 1
@@ -62,7 +62,7 @@ class Actions:
 
     def sell_on_area(self, player, group, game):
         if group.is_color and group.owner() is player:
-            props = sorted(group.properties, key=lambda x: x.houses, reverse=True)
+            props = sorted(reversed(group.properties), key=lambda x: x.buildings, reverse=True)
             prop_to_sell = props[0]
             if 0 < prop_to_sell.buildings < 5:
                 game.houses += 1
@@ -89,7 +89,7 @@ class Actions:
             while player.money < amount and can_sell:
                 can_sell = self.sell_property(player, game)
             if player.money < amount:
-                self.bankrupt(player, target)
+                self.bankrupt(player, target, game)
                 return False
 
         player.money -= amount
@@ -116,7 +116,7 @@ class Actions:
                     break
         return done
 
-    def bankrupt(self, player, target=None):
+    def bankrupt(self, player, target, game):
         player.bankrupt = True
         if self.verbose:
             print("%s goes bankrupt" % player.name)
@@ -125,7 +125,7 @@ class Actions:
             target.money += player.money
         else:
             for prop in player.properties:
-                self.auction(prop)
+                self.auction(prop, game)
 
     def send_to_jail(self, player):
         player.current_pos = 10
@@ -152,7 +152,7 @@ class Actions:
         if last_pos > player.current_pos and self.verbose:
             print("%s collects %d for passing GO" % (player.name, 200))
 
-    def auction(self, prop):
+    def auction(self, prop, game):
         pass
 
     def draw_from_deck(self, player, deck):
@@ -162,16 +162,16 @@ class Actions:
             print("%s draws card: %s", player.name, card.name)
         return card
 
-    def check_pos(self, player, game):
+    def check_pos(self, player, game, dices=None):
         card_landed = game.board[player.current_pos]
         if self.verbose:
-            print("%s has landed on %s", player.name, card_landed.desc())
+            print("%s has landed on %s" %  (player.name, card_landed.desc()))
 
-        if card_landed.is_property and card_landed.has_owner() and card_landed.owner is not player:
-            rent = card_landed.calc_rent()
-            game.acts.pay_money(rent, player, card_landed.owner, self)
+        if card_landed.is_property and card_landed.has_owner() and card_landed.owner is not player and not card_landed.mortgaged:
+            rent = card_landed.calc_rent(dices)
+            game.acts.pay_money(rent, player, card_landed.owner, game)
         elif card_landed.is_tax:
-            game.acts.pay_money(card_landed.tax, player, None, self)
+            game.acts.pay_money(card_landed.tax, player, None, game)
         elif card_landed.is_go_jail:
             game.acts.send_to_jail(player)
         elif card_landed.is_community:
@@ -181,7 +181,7 @@ class Actions:
             card = self.draw_from_deck(player, game.chance_cards)
             card.apply(game)
             
-    def try_to_escape_jail(self, player, dice1, dice2):
+    def try_to_escape_jail(self, player, dice1, dice2, game):
         if dice1 == dice2:
             player.in_jail = False
             player.turns_in_jail = 0
@@ -192,7 +192,7 @@ class Actions:
             if player.turns_in_jail == 3:
                 if self.verbose:
                     print("%s didn't rolled doubles in three turns" % player.name)
-                self.pay_money(amount=50, player=player, target=None, game=self)
+                self.pay_money(amount=50, player=player, target=None, game=game)
 
 
 

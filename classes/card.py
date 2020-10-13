@@ -9,7 +9,7 @@ class Group:
 
     def owner(self):
         owner = self.properties[0].owner
-        mortgaged = any([card.mortgage for card in self.properties])
+        mortgaged = any([card.mortgaged for card in self.properties])
         same_owner = all([card.owner is owner for card in self.properties])
         if not mortgaged and same_owner:
             return owner
@@ -22,7 +22,7 @@ class Group:
         return len([prop for prop in self.properties if prop.owner is owner])
 
     def has_buildings(self):
-        return any([prop.houses > 0 for prop in self.properties])
+        return any([prop.buildings > 0 for prop in self.properties])
 
 
 class Card:
@@ -58,6 +58,8 @@ class PropertyCard(Card):
     def calc_rent(self, dices=None):
         if self.buildings == 0 and self.group.owner() is self.owner:
             return self.rent_prices[0] * 2
+        if self.buildings > 5:
+            print(self.buildings)
         return self.rent_prices[self.buildings]
 
     def has_owner(self):

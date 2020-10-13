@@ -58,8 +58,9 @@ class PropertyCard(Card):
     def calc_rent(self, dices=None):
         if self.buildings == 0 and self.group.owner() is self.owner:
             return self.rent_prices[0] * 2
-        if self.buildings > 5:
-            print(self.buildings)
+        if not 0 <= self.buildings < len(self.rent_prices):
+            print("ERROR: ", self.buildings)
+            print(self.name)
         return self.rent_prices[self.buildings]
 
     def has_owner(self):

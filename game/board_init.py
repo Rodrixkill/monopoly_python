@@ -22,7 +22,7 @@ def initialize_board():
     utilities = Group("Utility", [electric_company, water_works], None, is_color=False)
 
     med_ave = PropertyCard("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250], 30)
-    baltic_ave = PropertyCard("Baltic Avenue", 60, [4, 20, 60, 180, 320], 30)
+    baltic_ave = PropertyCard("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450], 30)
     brown = Group("Brown", [med_ave, baltic_ave], 50)
 
     oriental_ave = PropertyCard("Oriental Avenue", 100, [6, 30, 90, 270, 400, 550], 50)

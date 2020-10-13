@@ -159,7 +159,7 @@ class Actions:
         card = deck.pop(0)
         deck.append(card)
         if self.verbose:
-            print("%s draws card: %s", player.name, card.name)
+            print("%s draws card: %s" % (player.name, card.name))
         return card
 
     def check_pos(self, player, game, dices=None):

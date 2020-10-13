@@ -88,8 +88,11 @@ class Game:
         index_group = self.groups.index(card.group)
         state = State(player, self)
         groups = self.groups[index_group:] + self.groups[:index_group]
+        place = self.board[player.current_pos]
         for i in range(MAX_ACTIONS_PER_GROUP):
             for group in groups:
+                if group.num_owned(player) == 0 and not (place.is_property and place.group is group):
+                    continue
                 action = player.policy(state.get_state(group))
                 self.rl_acts.do_action(player, action, group)
                 if action != DO_NOTHING:

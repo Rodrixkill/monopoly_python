@@ -13,6 +13,7 @@ class RLActions:
         self.verbose = game.verbose
 
     def do_action(self, player, action, group):
+        assert (action in [SPEND, GET_MONEY, DO_NOTHING])
         if action == SPEND:
             if self.verbose:
                 print("%s will try to spend on group %s" % (player.name, group.color))

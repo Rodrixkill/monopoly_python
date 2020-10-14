@@ -66,15 +66,16 @@ class Game:
             player = self.players[self.player_index]
             self.play_turn(player)
             self.turns += 1
-            self.player_index = (self.player_index + 1) % len(self.players)
+            if self.doubles_counter == 0:
+                self.player_index = (self.player_index + 1) % len(self.players)
             if self.verbose:
                 input()
 
         winner = self.winner()
-        winner.receive_reward(WIN_REWARD)
+        winner.receive_reward(WIN_REWARD, None, done=True)
         for player in self.players:
             if player is not winner:
-                player.receive_reward(DEFEAT_REWARD)
+                player.receive_reward(DEFEAT_REWARD, None, done=True)
 
         if self.verbose:
             print("%s wins!" % winner.name)
@@ -86,19 +87,20 @@ class Game:
             temp_pos += 1
         card = self.board[temp_pos]
         index_group = self.groups.index(card.group)
-        state = State(player, self)
         groups = self.groups[index_group:] + self.groups[:index_group]
         place = self.board[player.current_pos]
         for i in range(MAX_ACTIONS_PER_GROUP):
             for group in groups:
                 if group.num_owned(player) == 0 and not (place.is_property and place.group is group):
                     continue
-                action = player.policy(state.get_state(group))
+                state = State(player, self).get_state(group)
+                action = player.policy(state)
                 self.rl_acts.do_action(player, action, group)
-                if action != DO_NOTHING:
-                    state = State(player, self)
+                new_state = State(player, self).get_state(group)
                 reward = self.calc_reward(player)
-                player.receive_reward(reward)
+                player.receive_reward(reward, new_state)
+
+        player.train()
 
     def play_turn(self, player):
         if player.bankrupt:
@@ -117,6 +119,7 @@ class Game:
         if dice1 == dice2:
             self.doubles_counter += 1
             if self.doubles_counter == 3:
+                self.doubles_counter = 0
                 self.acts.send_to_jail(player)
                 return
         else:

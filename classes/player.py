@@ -1,5 +1,7 @@
 import random
+import numpy as np
 from classes.rl_actions import SPEND, GET_MONEY, DO_NOTHING
+from collections import deque
 
 class Player:
     def __init__(self, name):
@@ -10,8 +12,6 @@ class Player:
         self.in_jail = False
         self.turns_in_jail = 0
         self.bankrupt = False
-        self.last_state = None
-        self.last_action = None
 
     def reset(self):
         self.properties = []
@@ -33,7 +33,10 @@ class Player:
     def policy(self, state):
         pass
 
-    def receive_reward(self, reward):
+    def receive_reward(self, reward, new_state, done=False):
+        pass
+
+    def train(self):
         pass
 
 
@@ -55,3 +58,62 @@ class FixedPolicyAgent(Player):
             return SPEND
         else:
             return DO_NOTHING
+
+
+class RLAgent(Player):
+    def __init__(self, name, model, target_model, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125):
+        Player.__init__(self, name)
+        self.eps = eps
+        self.model = model
+        self.target_model = target_model
+        self.gamma = gamma
+        self.eps = eps
+        self.eps_decay = eps_decay
+        self.tau = tau
+        self.last_action = None
+        self.last_state = None
+        self.memory = deque(maxlen=2000)
+        self.training = False
+
+    def policy(self, state):
+        self.eps *= self.eps_decay
+        self.last_state = np.array(state).reshape(1, -1)
+        if self.training and np.random.random() < self.eps:
+            self.last_action = np.random.randint(3)
+        else:
+            self.last_action = np.argmax(self.model.predict(self.last_state)[0])
+        return self.last_action
+
+    def receive_reward(self, reward, new_state, done=False):
+        state = np.copy(self.last_state)
+        new_state = np.array(new_state).reshape(1, -1)
+        self.memory.append((state, self.last_action, reward, new_state, done))
+
+    def train(self):
+        if self.training:
+            self.model_train()
+            self.target_train()
+
+    def model_train(self):
+        batch_size = 1
+        if len(self.memory) < batch_size:
+            return
+
+        samples = random.sample(self.memory, batch_size)
+        for sample in samples:
+            state, action, reward, new_state, done = sample
+            target = self.target_model.predict(state)
+            if done:
+                target[0][action] = reward
+            else:
+                Q_future = max(self.target_model.predict(new_state)[0])
+                target[0][action] = reward + Q_future * self.gamma
+            self.model.fit(state, target, epochs=1, verbose=0)
+
+    def target_train(self):
+        weights = self.model.get_weights()
+        target_weights = self.target_model.get_weights()
+        for i in range(len(target_weights)):
+            target_weights[i] = weights[i] * self.tau + target_weights[i] * (1 - self.tau)
+        self.target_model.set_weights(target_weights)
+

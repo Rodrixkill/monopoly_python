@@ -7,8 +7,8 @@ from game.fortune_init import initialize_chance_cards, initialize_community_card
 from classes.monopoly_actions import Actions
 from classes.rl_actions import RLActions
 
-MAX_ACTIONS_PER_GROUP = 3
-TURN_LIMIT = 10000
+MAX_ACTIONS_PER_GROUP = 1
+TURN_LIMIT = 100
 MAX_HOUSES = 25
 MAX_HOTELS = 10
 WIN_REWARD = 10

@@ -1,7 +1,9 @@
 import random
 import numpy as np
+import tensorflow as tf
 from classes.rl_actions import SPEND, GET_MONEY, DO_NOTHING
 from collections import deque
+
 
 class Player:
     def __init__(self, name):
@@ -61,54 +63,57 @@ class FixedPolicyAgent(Player):
 
 
 class RLAgent(Player):
-    def __init__(self, name, model, target_model, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125):
+    def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125,
+                 batch_size=32, min_experiences=100, max_experiences=1000, num_actions=3):
         Player.__init__(self, name)
         self.eps = eps
         self.model = model
         self.target_model = target_model
+        self.optimizer = tf.optimizers.Adam(lr)
         self.gamma = gamma
         self.eps = eps
         self.eps_decay = eps_decay
         self.tau = tau
+        self.batch_size = batch_size
+        self.min_experiences = min_experiences
         self.last_action = None
         self.last_state = None
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=max_experiences)
         self.training = False
+        self.num_actions = num_actions
 
     def policy(self, state):
         self.eps *= self.eps_decay
-        self.last_state = np.array(state).reshape(1, -1)
+        self.last_state = state
         if self.training and np.random.random() < self.eps:
-            self.last_action = np.random.randint(3)
+            self.last_action = np.random.randint(self.num_actions)
         else:
-            self.last_action = np.argmax(self.model.predict(self.last_state)[0])
+            self.last_action = np.argmax(self.model.predict(self.last_state))
         return self.last_action
 
     def receive_reward(self, reward, new_state, done=False):
-        state = np.copy(self.last_state)
-        new_state = np.array(new_state).reshape(1, -1)
-        self.memory.append((state, self.last_action, reward, new_state, done))
+        state = [x for x in self.last_state]
+        self.memory.append([state, self.last_action, reward, new_state, done])
 
     def train(self):
-        if self.training:
+        if self.training and len(self.memory) >= self.min_experiences:
             self.model_train()
             self.target_train()
 
     def model_train(self):
-        batch_size = 1
-        if len(self.memory) < batch_size:
-            return
+        samples = random.sample(self.memory, self.batch_size)
+        states, actions, rewards, next_states, dones = tuple(np.array(samples).T)
+        value_next = np.max(self.target_model.predict(next_states.reshape(self.batch_size, -1)), axis=1)
+        actual_values = np.where(dones, rewards, rewards+self.gamma*value_next)
 
-        samples = random.sample(self.memory, batch_size)
-        for sample in samples:
-            state, action, reward, new_state, done = sample
-            target = self.target_model.predict(state)
-            if done:
-                target[0][action] = reward
-            else:
-                Q_future = max(self.target_model.predict(new_state)[0])
-                target[0][action] = reward + Q_future * self.gamma
-            self.model.fit(state, target, epochs=1, verbose=0)
+        with tf.gradient as tape:
+            selected_action_values = tf.math.reduce_sum(
+                  self.model.predict(states) * tf.one_hot(actions, self.num_actions), axis=1)
+            loss = tf.math.reduce_mean(tf.square(actual_values - selected_action_values))
+        variables = self.model.trainable_variables
+        gradients = tape.gradient(loss, variables)
+        self.optimizer.apply_gradients(zip(gradients, variables))
+        return loss
 
     def target_train(self):
         weights = self.model.get_weights()

@@ -15,11 +15,11 @@ def initialize_board():
     penn_rr = RailRoadCard("Pennsylvania Railroad")
     bno_rr = RailRoadCard("B. & O. Railroad")
     short_line_rr = RailRoadCard("Short Line")
-    railroads = Group("Railroad", [reading_rr, penn_rr, bno_rr, short_line_rr], None, is_color=False)
+    railroads = Group("Railroad", [reading_rr, penn_rr, bno_rr, short_line_rr], 0, is_color=False)
 
     electric_company = UtilityCard("Electric Company")
     water_works = UtilityCard("Water Works")
-    utilities = Group("Utility", [electric_company, water_works], None, is_color=False)
+    utilities = Group("Utility", [electric_company, water_works], 0, is_color=False)
 
     med_ave = PropertyCard("Mediterranean Avenue", 60, [2, 10, 30, 90, 160, 250], 30)
     baltic_ave = PropertyCard("Baltic Avenue", 60, [4, 20, 60, 180, 320, 450], 30)

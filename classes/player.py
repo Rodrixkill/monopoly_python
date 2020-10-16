@@ -64,7 +64,7 @@ class FixedPolicyAgent(Player):
 
 class RLAgent(Player):
     def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125,
-                 batch_size=3, min_experiences=100, max_experiences=1000, num_actions=3):
+                 batch_size=32, min_experiences=100, max_experiences=1000, num_actions=3):
         Player.__init__(self, name)
         self.eps = eps
         self.model = model

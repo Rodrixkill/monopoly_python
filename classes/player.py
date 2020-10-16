@@ -64,7 +64,7 @@ class FixedPolicyAgent(Player):
 
 class RLAgent(Player):
     def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125,
-                 batch_size=32, min_experiences=100, max_experiences=1000, num_actions=3):
+                 batch_size=3, min_experiences=100, max_experiences=1000, num_actions=3):
         Player.__init__(self, name)
         self.eps = eps
         self.model = model
@@ -93,6 +93,8 @@ class RLAgent(Player):
 
     def receive_reward(self, reward, new_state, done=False):
         state = [x for x in self.last_state]
+        if new_state is None:
+            new_state = [0] * len(state)
         self.memory.append([state, self.last_action, reward, new_state, done])
 
     def train(self):
@@ -102,11 +104,17 @@ class RLAgent(Player):
 
     def model_train(self):
         samples = random.sample(self.memory, self.batch_size)
-        states, actions, rewards, next_states, dones = tuple(np.array(samples).T)
+        states, actions, rewards, next_states, dones = tuple([np.array(x.tolist()) for x in np.array(samples).T])
+        # print("States:", states.shape)
+        # print("Actions:", actions.shape)
+        # print("Rewards:", rewards.shape)
+        # print("Next States:", next_states.shape)
+        # print(next_states.tolist())
+        # print("Dones:", dones.shape)
         value_next = np.max(self.target_model.predict(next_states.reshape(self.batch_size, -1)), axis=1)
         actual_values = np.where(dones, rewards, rewards+self.gamma*value_next)
 
-        with tf.gradient as tape:
+        with tf.GradientTape() as tape:
             selected_action_values = tf.math.reduce_sum(
                   self.model.predict(states) * tf.one_hot(actions, self.num_actions), axis=1)
             loss = tf.math.reduce_mean(tf.square(actual_values - selected_action_values))

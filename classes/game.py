@@ -100,8 +100,6 @@ class Game:
                 reward = self.calc_reward(player)
                 player.receive_reward(reward, new_state)
 
-        player.train()
-
     def play_turn(self, player):
         if player.bankrupt:
             return

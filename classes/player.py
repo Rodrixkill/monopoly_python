@@ -63,7 +63,7 @@ class FixedPolicyAgent(Player):
 
 
 class RLAgent(Player):
-    def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.99, tau=0.125,
+    def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.9999, eps_min=0.1, tau=0.125,
                  batch_size=32, min_experiences=100, max_experiences=1000, num_actions=3):
         Player.__init__(self, name)
         self.eps = eps
@@ -72,6 +72,7 @@ class RLAgent(Player):
         self.optimizer = tf.optimizers.Adam(lr)
         self.gamma = gamma
         self.eps = eps
+        self.eps_min = eps_min
         self.eps_decay = eps_decay
         self.tau = tau
         self.batch_size = batch_size
@@ -85,7 +86,7 @@ class RLAgent(Player):
     def policy(self, state):
         self.eps *= self.eps_decay
         self.last_state = state
-        if self.training and np.random.random() < self.eps:
+        if self.training and np.random.random() < max(self.eps, self.eps_min):
             self.last_action = np.random.randint(self.num_actions)
         else:
             self.last_action = np.argmax(self.model.predict(self.last_state))
@@ -96,6 +97,7 @@ class RLAgent(Player):
         if new_state is None:
             new_state = [0] * len(state)
         self.memory.append([state, self.last_action, reward, new_state, done])
+        self.train()
 
     def train(self):
         if self.training and len(self.memory) >= self.min_experiences:

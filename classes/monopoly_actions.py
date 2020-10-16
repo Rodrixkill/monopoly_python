@@ -149,8 +149,10 @@ class Actions:
         elif position is not None:
             player.current_pos = position
 
-        if last_pos > player.current_pos and self.verbose:
-            print("%s collects %d for passing GO" % (player.name, 200))
+        if last_pos > player.current_pos:
+            player.money += 200
+            if self.verbose:
+                print("%s collects %d for passing GO" % (player.name, 200))
 
     def auction(self, prop, game):
         pass

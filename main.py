@@ -31,6 +31,7 @@ class MyModel(tf.keras.Model):
 
 def test_players(players, total_games, verbose=False):
     num_wins = [0] * len(players)
+    print("Testing: ", [p.name for p in players])
     for i in range(total_games):
         if i % 10 == 0:
             print("Episodes:", i)
@@ -49,12 +50,14 @@ start_time = time()
 # #
 test_players([random_agent, fixed_agent], 100)
 test_players([random_agent, rlagent], 100)
+test_players([fixed_agent, rlagent], 100)
 test_players([rlagent, fixed_agent, random_agent], 100)
 rlagent.training = True
 rlagent.eps = 0.5
 test_players([rlagent, fixed_agent], 1000)
 rlagent.training = False
 test_players([random_agent, rlagent], 100)
+test_players([fixed_agent, rlagent], 100)
 test_players([rlagent, fixed_agent, random_agent], 100)
 ##
 elapsed_time = time() - start_time

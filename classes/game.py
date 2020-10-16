@@ -8,7 +8,7 @@ from classes.monopoly_actions import Actions
 from classes.rl_actions import RLActions
 
 MAX_ACTIONS_PER_GROUP = 3
-TURN_LIMIT = 1000
+TURN_LIMIT = 100
 MAX_HOUSES = 25
 MAX_HOTELS = 10
 WIN_REWARD = 10

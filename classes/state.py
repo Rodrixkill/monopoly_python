@@ -33,8 +33,16 @@ class State:
                     player_props += 1
                 total_props += 1
 
-        self.finance = [player_props / total_props, game.smooth_function(player.money / MAX_MONEY)]
+        self.relative_props = player_props / total_props
+        self.money = player.money
+
+    def normalize_money(self):
+        return self.game.smooth_function((self.money / MAX_MONEY))
 
     def get_state(self, group):
         pos = (1 + self.game.groups.index(group)) / len(self.game.groups)
-        return self.player_info + self.others_info + [pos] + self.finance
+        return self.player_info + self.others_info + [pos, self.relative_props, self.normalize_money()]
+
+    def get_state_taking_money(self, amount, group):
+        self.money -= amount
+        return self.get_state(group)

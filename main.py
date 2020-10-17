@@ -33,7 +33,7 @@ def test_players(players, total_games, verbose=False):
     num_wins = [0] * len(players)
     print("Testing: ", [p.name for p in players])
     for i in range(total_games):
-        if i % 10 == 0:
+        if i % 1 == 0:
             print("Episodes:", i)
         game = Game(random.sample(players, len(players)), verbose=verbose)
         winner = game.play()

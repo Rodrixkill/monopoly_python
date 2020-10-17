@@ -1,4 +1,5 @@
 import random
+from classes.state import State
 
 
 class Actions:
@@ -6,10 +7,10 @@ class Actions:
     def __init__(self, verbose=False):
         self.verbose = verbose
 
-    def buy_property(self, player, prop):
+    def buy_property(self, player, prop, cost=None):
         if prop.is_property and not prop.has_owner() and prop.owner is not player and player.money > prop.cost:
             prop.owner = player
-            player.money -= prop.cost
+            player.money -= prop.cost if cost is None else cost
             player.properties.append(prop)
             if self.verbose:
                 print("%s buys property %s for $%d" % (player.name, prop.desc(), prop.cost))
@@ -155,7 +156,50 @@ class Actions:
                 print("%s collects %d for passing GO" % (player.name, 200))
 
     def auction(self, prop, game):
-        pass
+        players = game.players_not_in_bankrupt()
+        if prop.is_property and not prop.has_owner():
+            bidder = -1
+            m = 0.4
+            if self.verbose:
+                print("Auction for %s started" % prop.desc())
+            for player in players:
+                bid = prop.cost*m
+                state = State(player, game).get_state_taking_money(bid, prop.group)
+                action = player.policy(state)
+                if action == 1 and player.money >= bid:
+                    if self.verbose:
+                        print("%s bids %d$ for property %s" % (player.name, bid, prop.desc()))
+                    bidder = player
+                    break
+
+            if bidder == -1:
+                if self.verbose:
+                    print("Nobody bidded for %s" % prop.desc())
+                return
+
+            i = players.index(bidder)
+            while True:
+                i = (i + 1) % len(players)
+                player = players[i]
+                if player is bidder:
+                    break
+                bid = prop.cost*m
+                state = State(player, game).get_state_taking_money(bid, prop.group)
+                action = player.policy(state)
+                if action == 1 and player.money >= bid:
+                    if self.verbose:
+                        print("%s bids %d$ for property %s" % (player.name, bid, prop.desc()))
+                    bidder = player
+                    m += 0.2
+
+            if self.verbose:
+                print("%s won auction for %s" % (player.name, prop.desc()))
+
+            self.buy_property(bidder, prop, prop.cost*m)
+
+            new_state = State(bidder, game).get_state(prop.group)
+            reward = game.calc_reward(bidder)
+            bidder.receive_reward(reward, new_state)
 
     def draw_from_deck(self, player, deck):
         card = deck.pop(0)
@@ -193,8 +237,12 @@ class Actions:
             player.turns_in_jail += 1
             if player.turns_in_jail == 3:
                 if self.verbose:
-                    print("%s didn't rolled doubles in three turns" % player.name)
+                    print("%s didn't rolled doubles in three turns and paid 50$ to be released" % player.name)
+                player.in_jail = False
+                player.turns_in_jail = 0
                 self.pay_money(amount=50, player=player, target=None, game=game)
+            elif self.verbose:
+                print("%s's turn number %d on prison")
 
 
 

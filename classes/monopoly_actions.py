@@ -10,10 +10,12 @@ class Actions:
     def buy_property(self, player, prop, cost=None):
         if prop.is_property and not prop.has_owner() and prop.owner is not player and player.money > prop.cost:
             prop.owner = player
-            player.money -= prop.cost if cost is None else cost
+            if cost is None:
+                cost = prop.cost
+            player.money -= cost
             player.properties.append(prop)
             if self.verbose:
-                print("%s buys property %s for $%d" % (player.name, prop.desc(), prop.cost))
+                print("%s buys property %s for $%d" % (player.name, prop.desc(), cost))
                 print("%s's new balance: $%d" % (player.name, player.money))
             return True
         return False
@@ -242,7 +244,7 @@ class Actions:
                 player.turns_in_jail = 0
                 self.pay_money(amount=50, player=player, target=None, game=game)
             elif self.verbose:
-                print("%s's turn number %d on prison")
+                print("%s's turns in prison: %d" % (player.name, player.turns_in_jail))
 
 
 

@@ -160,26 +160,31 @@ class Actions:
     def auction(self, prop, game):
         players = game.players_not_in_bankrupt()
         if prop.is_property and not prop.has_owner():
-            bidder = -1
-            m = 0.4
             if self.verbose:
                 print("Auction for %s started" % prop.desc())
-            for player in players:
-                bid = prop.cost*m
-                state = State(player, game).get_state_taking_money(bid, prop.group)
-                action = player.policy(state)
-                if action == 1 and player.money >= bid:
-                    if self.verbose:
-                        print("%s bids %d$ for property %s" % (player.name, bid, prop.desc()))
-                    bidder = player
+            bidder = -1
+            m = 0.4
+
+            while m >= 0:
+                for player in players:
+                    bid = prop.cost*m
+                    state = State(player, game).get_state_taking_money(bid, prop.group)
+                    action = player.policy(state)
+                    if action == 1 and player.money >= bid:
+                        if self.verbose:
+                            print("%s bids %d$ for property %s" % (player.name, bid, prop.desc()))
+                        bidder = player
+                        break
+                if bidder == -1:
+                    m -= 0.1
+                else:
                     break
 
             if bidder == -1:
-                if self.verbose:
-                    print("Nobody bidded for %s" % prop.desc())
-                return
+                bidder = random.choice(players)
 
             i = players.index(bidder)
+            bid = -1
             while True:
                 i = (i + 1) % len(players)
                 player = players[i]
@@ -197,11 +202,12 @@ class Actions:
             if self.verbose:
                 print("%s won auction for %s" % (player.name, prop.desc()))
 
-            self.buy_property(bidder, prop, prop.cost*m)
+            self.buy_property(bidder, prop, bid)
 
-            new_state = State(bidder, game).get_state(prop.group)
-            reward = game.calc_reward(bidder)
-            bidder.receive_reward(reward, new_state)
+            for player in players:
+                reward = game.calc_reward(player)
+                new_state = State(player, game).get_state(prop.group)
+                player.receive_reward(reward, new_state)
 
     def draw_from_deck(self, player, deck):
         card = deck.pop(0)
@@ -213,7 +219,7 @@ class Actions:
     def check_pos(self, player, game, dices=None):
         card_landed = game.board[player.current_pos]
         if self.verbose:
-            print("%s has landed on %s" %  (player.name, card_landed.desc()))
+            print("%s has landed on %s" % (player.name, card_landed.desc()))
 
         if card_landed.is_property and card_landed.has_owner() and card_landed.owner is not player and not card_landed.mortgaged:
             rent = card_landed.calc_rent(dices)

@@ -3,8 +3,8 @@ from classes.game import Game
 import random
 import tensorflow as tf
 import numpy as np
+import matplotlib.pyplot as plt
 from time import time
-
 
 class MyModel(tf.keras.Model):
     def __init__(self, input_size, hidden_units, num_actions):
@@ -14,9 +14,9 @@ class MyModel(tf.keras.Model):
         self.hidden_layers = []
         for i in hidden_units:
             self.hidden_layers.append(tf.keras.layers.Dense(
-                i, activation='relu', kernel_initializer='RandomNormal'))
+                i, activation='relu', kernel_initializer='Zeros'))
         self.output_layer = tf.keras.layers.Dense(
-            num_actions, activation='linear', kernel_initializer='RandomNormal')
+            num_actions, activation='linear', kernel_initializer='Zeros')
 
     def predict(self, inputs):
         if type(inputs) != np.array:
@@ -29,36 +29,63 @@ class MyModel(tf.keras.Model):
         return output
 
 
-def test_players(players, total_games, verbose=False):
+def test_players(players, total_games, verbose=False, turn_limit=100):
     num_wins = [0] * len(players)
-    print("Testing: ", [p.name for p in players])
     for i in range(total_games):
-        if i % 1 == 0:
+        if i % 10 == 0:
             print("Episodes:", i)
         game = Game(random.sample(players, len(players)), verbose=verbose)
+        game.turn_limit = turn_limit
         winner = game.play()
         num_wins[players.index(winner)] += 1
 
     for i in range(len(players)):
+        wins_array[i] = num_wins[i] / total_games
         print(players[i].name, ": ", num_wins[i] / total_games)
 
-
+def smooth_function(x):
+        return x / (1 + abs(x))
+wins_array= [0] * 2
+fig = plt.figure()
+ax = fig.add_axes([0, 0, 1, 1])
 random_agent = RandomAgent("RandomAgent")
+agents = ['Fixed Agent', 'RL Agent']
 fixed_agent = FixedPolicyAgent("FixedPolicyAgent", max_get_money=150, min_spend=350)
-rlagent = RLAgent("RLAgent", model=MyModel(23, [50, 50], 3), target_model=MyModel(23, [50, 50], 3))
+rlagent = RLAgent("RLAgent", model=MyModel(1, [20], 3), target_model=MyModel(1, [20], 3), lr=0.01)
 start_time = time()
-# #
-test_players([random_agent, fixed_agent], 100)
-test_players([random_agent, rlagent], 100)
-test_players([fixed_agent, rlagent], 100)
-test_players([rlagent, fixed_agent, random_agent], 100)
-rlagent.training = True
-rlagent.eps = 0.5
-test_players([rlagent, fixed_agent], 1000)
+
+
+#Testing
+print("Testing")
 rlagent.training = False
-test_players([random_agent, rlagent], 100)
-test_players([fixed_agent, rlagent], 100)
-test_players([rlagent, fixed_agent, random_agent], 100)
-##
+rlagent.cum_rewards = []
+rlagent.sum_rewards = 0
+test_players([fixed_agent, rlagent], 100, turn_limit=100)
+print("avg reward", sum(rlagent.cum_rewards)/len(rlagent.cum_rewards))
+
+for j in range(0, 2000, 50):
+    print(j, ':', rlagent.model.predict([j]).numpy())
+
+for i in range(10):
+    # Training
+    print("Training")
+    rlagent.training = True
+    rlagent.eps = 0.3
+    test_players([fixed_agent, rlagent], 200, turn_limit=100)
+
+
+    print("Testing")
+    rlagent.training = False
+    rlagent.cum_rewards = []
+    rlagent.sum_rewards = 0
+    test_players([fixed_agent, rlagent], 100, turn_limit=100)
+    print("avg reward", sum(rlagent.cum_rewards)/len(rlagent.cum_rewards))
+
+    for j in range(0, 2000, 50):
+        print(j, ':', rlagent.model.predict([j]).numpy())
+
+
 elapsed_time = time() - start_time
 print("Elapsed time: %0.10f seconds." % elapsed_time)
+ax.bar(agents, wins_array)
+plt.show()

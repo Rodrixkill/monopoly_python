@@ -7,8 +7,8 @@ from game.fortune_init import initialize_chance_cards, initialize_community_card
 from classes.monopoly_actions import Actions
 from classes.rl_actions import RLActions
 
-MAX_ACTIONS_PER_GROUP = 3
-TURN_LIMIT = 100
+MAX_ACTIONS_PER_GROUP = 1
+TURN_LIMIT = 1000
 MAX_HOUSES = 25
 MAX_HOTELS = 10
 WIN_REWARD = 10
@@ -17,6 +17,7 @@ DEFEAT_REWARD = -10
 
 class Game:
     def __init__(self, players, verbose=False):
+        self.turn_limit = TURN_LIMIT
         self.players = players
         self.bankrupt_players = []
         self.board, self.groups = initialize_board()
@@ -38,7 +39,7 @@ class Game:
         return [player for player in self.players if not player.bankrupt]
 
     def game_over(self):
-        return self.turns >= TURN_LIMIT or len(self.players_not_in_bankrupt()) == 1
+        return self.turns >= self.turn_limit or len(self.players_not_in_bankrupt()) == 1
 
     def winner(self):
         assert (self.game_over())
@@ -46,17 +47,18 @@ class Game:
         if len(players) == 1:
             return players[0]
         else:
-            richest_players = sorted(self.players, key=lambda x: x.total_net_worth(), reverse=True)
+            richest_players = sorted(players, key=lambda x: x.total_net_worth(), reverse=True)
             return richest_players[0]
 
     def calc_reward(self, player):
-        p = len(self.players_not_in_bankrupt())
-        c = 1 / len(self.players_not_in_bankrupt())
-        m = player.money / sum([p.money for p in self.players])
-
-        props = [card for card in self.board if card.is_property and card.has_owner()]
-        v = sum([(prop.buildings+1) * (1 if prop.owner is player else -1) for prop in props])
-        return self.smooth_function((v*c)/p) + (1/p)*m
+        return WIN_REWARD / self.turn_limit
+        # p = len(self.players_not_in_bankrupt())
+        # c = 1 / len(self.players_not_in_bankrupt())
+        # m = player.money / sum([p.money for p in self.players])
+        #
+        # props = [card for card in self.board if card.is_property and card.has_owner()]
+        # v = sum([(prop.buildings+1) * (1 if prop.owner is player else -1) for prop in props])
+        # return self.smooth_function((v*c)/p) + (1/p)*m
 
     def play(self):
         for player in self.players:

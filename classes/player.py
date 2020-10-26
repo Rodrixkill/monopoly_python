@@ -63,7 +63,7 @@ class FixedPolicyAgent(Player):
 
 
 class RLAgent(Player):
-    def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.9999, eps_min=0.1, tau=0.125,
+    def __init__(self, name, model, target_model, lr=0.01, gamma=0.9, eps=0.5, eps_decay=0.99, eps_min=0.1, tau=0.125,
                  batch_size=32, min_experiences=100, max_experiences=1000, num_actions=3):
         Player.__init__(self, name)
         self.eps = eps
@@ -82,6 +82,8 @@ class RLAgent(Player):
         self.memory = deque(maxlen=max_experiences)
         self.training = False
         self.num_actions = num_actions
+        self.cum_rewards = []
+        self.sum_rewards = 0
 
     def policy(self, state):
         self.eps *= self.eps_decay
@@ -96,6 +98,10 @@ class RLAgent(Player):
         state = [x for x in self.last_state]
         if new_state is None:
             new_state = [0] * len(state)
+        self.sum_rewards += reward
+        if done:
+            self.cum_rewards.append(self.sum_rewards)
+            self.sum_rewards = 0
         self.memory.append([state, self.last_action, reward, new_state, done])
         self.train()
 
